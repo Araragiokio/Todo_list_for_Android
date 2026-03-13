@@ -1,9 +1,9 @@
 import { View, Text, StyleSheet } from 'react-native';
 
-export default function ModalScreen() {
+export default function RemindersScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Modal</Text>
+      <Text style={styles.text}>Reminders</Text>
     </View>
   );
 }
