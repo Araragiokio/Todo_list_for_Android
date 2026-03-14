@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '@/context/ThemeContext';
+import { StyleSheet, Text, View } from 'react-native';
 
 export default function RemindersScreen() {
   const { colors } = useTheme();

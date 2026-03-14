@@ -1,5 +1,5 @@
+import { Subtask, Task, TaskInput } from '@/types/Task';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Task, TaskInput, Subtask } from '@/types/Task';
 
 const TASKS_KEY = 'tasks';
 const CUSTOM_CATEGORIES_KEY = 'custom_categories';
