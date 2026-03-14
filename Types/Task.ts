@@ -1,60 +1,43 @@
 export type Priority = 'high' | 'medium' | 'low';
 
-export type Category =
-  | 'Study'
-  | 'Assignment'
-  | 'Reading'
-  | 'Research'
-  | 'Revision'
-  | 'Online Course'
-  | 'Workout'
-  | 'Meditation'
-  | 'Sleep Schedule'
-  | 'Meal Prep'
-  | 'Medicine'
-  | 'Cardio'
-  | 'House Chores'
-  | 'Shopping'
-  | 'Cooking'
-  | 'Laundry'
-  | 'Cleaning'
-  | 'Finance'
-  | 'Self Development'
-  | 'Journaling'
-  | 'Goal Setting'
-  | 'Skill Learning'
-  | 'Habit Tracking'
-  | 'Social'
-  | 'Gaming'
-  | 'Creative'
-  | 'Music Practice'
-  | 'Travel Planning'
-  | 'Anime'
-  | 'Work'
-  | 'Emails'
-  | 'Meetings'
-  | 'Coding'
-  | 'Planning'
-  | 'Prayer'
-  | 'Mindfulness'
-  | 'Gratitude'
-  | 'Custom';
+export type EnergyLevel = 'deep_work' | 'quick_task' | 'low_energy' | 'focus';
+
+export type RecurringType = 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+
+export interface Subtask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
 
 export interface Task {
   id: string;
-  name: string;
-  category: Category;
+  title: string;
+  category: string;
+  tags: string[];
+  energyLevel: EnergyLevel | null;
   priority: Priority;
   dueDate: string | null;
+  reminder: string | null;
+  notes: string;
+  subtasks: Subtask[];
   completed: boolean;
   createdAt: string;
-  reminder: string | null;
+  recurring: RecurringType;
+  recurringDay: string | null;
+  sortOrder: number;
 }
 
 export interface TaskInput {
-  name: string;
-  category: Category;
+  title: string;
+  category: string;
+  tags: string[];
+  energyLevel: EnergyLevel | null;
   priority: Priority;
   dueDate: string | null;
   reminder: string | null;
+  notes: string;
+  subtasks: Subtask[];
+  recurring: RecurringType;
+  recurringDay: string | null;
 }
