@@ -35,6 +35,7 @@ export default function HomeScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
+  const [showConfetti, setShowConfetti] = useState(false);
   const [sort, setSort] = useState<SortType>('created');
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
@@ -55,7 +56,10 @@ export default function HomeScreen() {
 
   const handleToggle = async (id: string) => {
     await toggleTask(id);
-    loadAll();
+    await loadAll();
+    const current = await getActiveTasks();
+    const allDone = current.length > 0 && current.every(t => t.completed);
+    if (allDone) setShowConfetti(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -200,13 +204,22 @@ export default function HomeScreen() {
 
       {/* Sakura background */}
       <LottieView
-        source={require('@/assets/animations/Cherry-Blossom.json')}
+        source={require('@/assets/animations/cherry-blossom.json')}
         autoPlay
         loop
-        style={[StyleSheet.absoluteFillObject, { opacity: 0.52 }]}
+        style={[StyleSheet.absoluteFillObject, { opacity: 0.12 }]}
         resizeMode="cover"
         speed={0.4}
       />
+      {showConfetti && (
+        <LottieView
+          source={require('@/assets/animations/confetti.json')}
+          autoPlay
+          loop={false}
+          style={StyleSheet.absoluteFillObject}
+          onAnimationFinish={() => setShowConfetti(false)}
+        />
+      )}
 
       <ScrollView
         style={styles.scroll}
