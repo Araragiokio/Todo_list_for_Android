@@ -207,7 +207,7 @@ export default function HomeScreen() {
         source={require('@/assets/animations/cherry-blossom.json')}
         autoPlay
         loop
-        style={[StyleSheet.absoluteFillObject, { opacity: 0.12 }]}
+        style={[StyleSheet.absoluteFillObject, { opacity: 0.52 }]}
         resizeMode="cover"
         speed={0.4}
       />
