@@ -309,11 +309,18 @@ export default function HomeScreen() {
           </>
         )}
 
-        {/* Empty state */}
-        {sortedActive.length === 0 && completedTasks.length === 0 && (
+        {/* Empty state — when no active tasks */}
+        {sortedActive.length === 0 && (
           <View style={styles.emptyState}>
-            <Text style={styles.emptyEmoji}>🗡️</Text>
-            <Text style={[styles.emptyText, { color: colors.subtext }]}>No tasks yet. Add one!</Text>
+            <LottieView
+              source={require('@/assets/animations/game-asset.json')}
+              autoPlay
+              loop
+              style={styles.emptyAnimation}
+            />
+            <Text style={[styles.emptyText, { color: colors.subtext }]}>
+              No tasks yet. Add your first quest!
+            </Text>
           </View>
         )}
 
@@ -472,9 +479,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row', justifyContent: 'space-between',
     alignItems: 'center', marginBottom: 8,
   },
-  emptyState: { alignItems: 'center', marginTop: 60 },
-  emptyEmoji: { fontSize: 44, marginBottom: 10 },
-  emptyText: { fontSize: 16 },
+  emptyState: { alignItems: 'center', marginTop: 40 },
+  emptyAnimation: { width: 260, height: 260 },
+  emptyText: { fontSize: 16, marginTop: 12, textAlign: 'center' },
   fab: {
     position: 'absolute', bottom: 80, right: 20,
     width: 54, height: 54, borderRadius: 27,
