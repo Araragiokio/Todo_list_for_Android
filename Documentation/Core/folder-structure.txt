@@ -1,0 +1,269 @@
+# TodoApp — Folder Structure
+
+## Overview
+
+TodoApp follows a **modular folder structure** to keep the codebase organized and maintainable.
+Each folder has a clearly defined responsibility, making it easier to locate files and expand the application as new features are added.
+
+The project uses **Expo Router**, which means files inside the `app/` directory automatically become screens.
+
+---
+
+# Root Structure
+
+```
+TodoApp/
+│
+├── app/                  → Application screens (Expo Router)
+├── assets/               → Images, icons, and animations
+├── components/           → Reusable UI components
+├── constants/            → Static configuration values
+├── context/              → Global state providers
+├── hooks/                → Custom React hooks
+├── services/             → Business logic layer
+├── storage/              → Local data persistence
+├── types/                → TypeScript interfaces and types
+├── utils/                → Helper functions
+├── docs/                 → Project documentation
+│
+├── app.json              → Expo configuration
+├── package.json          → Project dependencies
+├── tsconfig.json         → TypeScript configuration
+└── README.md             → Project introduction
+```
+
+---
+
+# app/
+
+The `app/` directory contains **all application screens**.
+Expo Router uses **file-based routing**, so each file here automatically becomes a navigable screen.
+
+```
+app/
+│
+├── _layout.tsx           → Root layout and providers
+├── splash.tsx            → Splash animation screen
+├── modal.tsx             → Placeholder modal screen
+│
+└── (tabs)/
+    ├── _layout.tsx       → Bottom tab navigator
+    ├── index.tsx         → Home screen
+    ├── addtask.tsx       → Add Task screen
+    ├── reminders.tsx     → Reminders screen
+    ├── settings.tsx      → Settings screen
+    └── profile.tsx       → Profile screen
+```
+
+### Purpose
+
+Handles navigation and screen layout for the entire application.
+
+---
+
+# assets/
+
+The `assets/` folder contains all static media used in the application.
+
+```
+assets/
+│
+├── animations/
+│   ├── cherry-blossom.json
+│   ├── confetti.json
+│   ├── document-checklist.json
+│   └── working-desk.json
+│
+└── images/
+    ├── icon.png
+    └── splash-icon.png
+```
+
+### Purpose
+
+Stores all media assets including animations, icons, and images.
+
+---
+
+# components/
+
+Reusable UI components shared across screens.
+
+```
+components/
+│
+├── TaskCard.tsx
+├── CategoryChip.tsx
+├── ProgressBar.tsx
+├── SearchBar.tsx
+├── SortMenu.tsx
+├── TagChip.tsx
+├── EnergyBadge.tsx
+├── SubtaskItem.tsx
+└── EmptyState.tsx
+```
+
+### Purpose
+
+Keeps UI elements reusable and prevents code duplication.
+
+---
+
+# constants/
+
+Stores static configuration data.
+
+```
+constants/
+│
+├── Colors.ts
+└── Categories.ts
+```
+
+### Purpose
+
+Keeps fixed values such as colors and predefined categories separate from logic.
+
+---
+
+# context/
+
+Contains global state providers used across the application.
+
+```
+context/
+│
+└── ThemeContext.tsx
+```
+
+### Purpose
+
+Provides shared state across screens without prop drilling.
+
+Currently used for the **theme system**.
+
+---
+
+# hooks/
+
+Custom React hooks that encapsulate reusable logic.
+
+```
+hooks/
+│
+├── useTasks.ts
+├── useSearch.ts
+└── useStreak.ts
+```
+
+### Purpose
+
+Separates complex state logic from UI components.
+
+---
+
+# services/
+
+The business logic layer of the application.
+
+```
+services/
+│
+├── TaskService.ts
+├── ReminderService.ts
+└── BadgeService.ts
+```
+
+### Purpose
+
+Applies rules and coordinates interactions between UI and storage.
+
+---
+
+# storage/
+
+Handles **data persistence** using AsyncStorage.
+
+```
+storage/
+│
+└── TaskStorage.ts
+```
+
+### Purpose
+
+Responsible for saving, loading, updating, and deleting tasks.
+
+---
+
+# types/
+
+Contains TypeScript type definitions used across the project.
+
+```
+types/
+│
+└── Task.ts
+```
+
+### Purpose
+
+Ensures consistent data structures across the application.
+
+---
+
+# utils/
+
+Helper functions used throughout the application.
+
+```
+utils/
+│
+├── dateUtils.ts
+├── sortUtils.ts
+└── tagUtils.ts
+```
+
+### Purpose
+
+Provides reusable functions for formatting dates, sorting tasks, and processing tags.
+
+---
+
+# docs/
+
+Contains project documentation.
+
+```
+docs/
+│
+├── core/
+│   ├── project-overview.md
+│   ├── architecture.md
+│   ├── folder-structure.md
+│
+├── development/
+│   ├── phase-progress.md
+│   ├── phase3-checklist.md
+│
+└── ai-context/
+    ├── project-context.md
+    └── current-state.md
+```
+
+### Purpose
+
+Stores documentation that explains how the project works.
+
+---
+
+# Design Philosophy
+
+The folder structure follows these principles:
+
+* Clear separation of responsibilities
+* Logical grouping of related files
+* Scalability for future features
+* Easy navigation for developers and AI assistants
+
+This structure ensures that TodoApp remains maintainable as the application grows.

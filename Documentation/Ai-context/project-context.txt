@@ -1,0 +1,229 @@
+# TodoApp — Project Context
+
+## Overview
+
+This document provides high-level context about the TodoApp project.
+
+Its purpose is to quickly help developers, contributors, or AI assistants understand:
+
+* what the project is
+* why it exists
+* how it is designed
+* what development stage it is currently in
+
+This file acts as a **quick orientation guide** before diving into deeper technical documentation.
+
+---
+
+# What TodoApp Is
+
+TodoApp is a **mobile productivity application** designed to help users organize tasks, track progress, and maintain daily productivity.
+
+Unlike traditional todo list applications, TodoApp focuses on making productivity feel **engaging and emotionally rewarding** rather than mechanical.
+
+The application combines:
+
+Task management
+Light gamification
+Visual feedback
+Clean mobile design
+
+to create a productivity tool that feels like a **daily companion**.
+
+---
+
+# Core Idea Behind the App
+
+Most productivity tools focus only on efficiency.
+
+TodoApp also focuses on **emotional motivation**.
+
+The app aims to make users feel:
+
+Accomplished when tasks are completed
+Encouraged to maintain streaks
+Rewarded through visual feedback
+
+Small design elements such as animations, progress tracking, and achievements are intended to make the experience feel more engaging.
+
+---
+
+# Target Users
+
+TodoApp is designed primarily for individuals who want a simple but powerful productivity system.
+
+Example users include:
+
+Students managing assignments and study tasks
+Developers tracking projects and coding work
+Professionals organizing daily responsibilities
+Individuals tracking personal goals and habits
+
+The goal is to support productivity across different life areas.
+
+---
+
+# Core Functionality
+
+The core functionality of TodoApp revolves around **task management**.
+
+Each task can include:
+
+Title
+Category
+Tags
+Priority level
+Energy level
+Due date
+Reminder
+Notes
+Subtasks
+Recurring rules
+
+These attributes allow tasks to be organized and filtered in multiple ways.
+
+---
+
+# Organizational Systems
+
+The app includes several systems to help users organize their tasks.
+
+Categories
+Used for broad grouping of tasks.
+
+Tags
+Allow flexible labeling and search.
+
+Energy Levels
+Help users choose tasks based on available energy.
+
+Sorting
+Allows tasks to be arranged by priority, deadline, or custom order.
+
+---
+
+# Design Philosophy
+
+TodoApp follows several design principles.
+
+Simplicity
+The interface should remain clean and easy to understand.
+
+Motivation
+Visual feedback should encourage task completion.
+
+Clarity
+Users should immediately understand their current workload.
+
+Minimal Distraction
+Animations and visuals should enhance the experience without overwhelming the interface.
+
+---
+
+# Technology Stack
+
+The application is built using modern mobile development tools.
+
+Framework:
+
+React Native + Expo
+
+Language:
+
+TypeScript
+
+Local Storage:
+
+AsyncStorage
+
+Navigation:
+
+Expo Router / React Navigation
+
+Animations:
+
+Lottie
+
+These tools allow the app to be developed quickly while maintaining good performance and maintainability.
+
+---
+
+# Current Development State
+
+TodoApp is currently in **Phase 3 — Core Features**.
+
+Completed systems include:
+
+Project setup
+Navigation system
+Theme system
+Splash screen animation
+Task data model
+Task storage system
+Home screen interface
+
+The next major feature being developed is the **Add Task screen**.
+
+---
+
+# Development Approach
+
+The project follows a **step-based development approach**.
+
+Features are implemented gradually in phases.
+
+Example progression:
+
+Phase 1 — Project Setup
+Phase 2 — Navigation and Theme
+Phase 3 — Core Task Features
+Phase 4 — Notifications
+Phase 5 — Firebase Integration
+Phase 6 — Analytics and Insights
+Phase 7 — Gamification System
+Phase 8 — Final Polish
+
+This structured approach keeps development organized and manageable.
+
+---
+
+# Long-Term Vision
+
+The long-term goal of TodoApp is to become a productivity tool that balances:
+
+Practical task management
+Motivation through feedback
+A pleasant and engaging user experience
+
+The aim is to create a system where users feel encouraged to maintain daily productivity habits.
+
+---
+
+# Role of Documentation
+
+Documentation plays an important role in the project.
+
+The documentation system helps:
+
+Developers understand the architecture
+AI tools understand the codebase
+Future development remain consistent
+
+Important documents include:
+
+Project Overview
+Architecture
+Folder Structure
+Implementation Notes
+Phase Progress
+Phase Checklists
+
+These documents together provide a complete understanding of the project.
+
+---
+
+# Summary
+
+TodoApp is a modern productivity application designed to combine **task organization, visual feedback, and motivational design**.
+
+The project is currently focused on implementing the core task management system, which will form the foundation for all future features.

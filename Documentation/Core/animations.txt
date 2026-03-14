@@ -1,0 +1,187 @@
+# TodoApp — Animation System
+
+## Overview
+
+Animations in TodoApp are used to enhance the user experience by providing visual feedback and making interactions feel more satisfying.
+
+The application uses **Lottie animations** to display high-quality, lightweight animations that run smoothly on mobile devices.
+
+Animations are used sparingly and only for meaningful events to avoid distracting the user.
+
+---
+
+# Animation Technology
+
+Animations are implemented using the following library:
+
+lottie-react-native
+
+Lottie allows animations exported from tools like **Adobe After Effects** to be played directly in React Native applications using JSON files.
+
+Advantages of Lottie:
+
+* Lightweight animation files
+* Smooth performance
+* Easy integration with React Native
+* Scalable across different screen sizes
+
+---
+
+# Animation Storage
+
+All animation files are stored in the following directory:
+
+assets/animations/
+
+Example structure:
+
+```
+assets/
+└── animations/
+    ├── cherry-blossom.json
+    ├── confetti.json
+    ├── document-checklist.json
+    └── working-desk.json
+```
+
+Each JSON file contains animation instructions used by the Lottie player.
+
+---
+
+# Current Animations Used
+
+## Splash Screen Animations
+
+The splash screen uses a sequence of animations during app startup.
+
+Animations used:
+
+document-checklist.json
+working-desk.json
+confetti.json
+
+These animations play in sequence to create a cinematic intro when the application launches.
+
+---
+
+## Sakura Background Animation
+
+Animation file:
+
+cherry-blossom.json
+
+Purpose:
+
+Provides a subtle animated background on the Home screen.
+
+Behavior:
+
+* Sakura petals slowly fall across the screen
+* Animation runs continuously
+* Opacity is reduced to avoid distracting the user
+
+Recommended opacity:
+
+0.12
+
+This creates a calm visual atmosphere while keeping the UI readable.
+
+---
+
+# Task Completion Animation (Planned)
+
+Animation:
+
+Sparkle effect
+
+Purpose:
+
+When a user marks a task as completed, a small sparkle animation will appear near the task card.
+
+Behavior:
+
+User taps completion checkbox
+→ Task is marked as complete
+→ Sparkle animation briefly appears
+
+This animation provides satisfying feedback for completing tasks.
+
+---
+
+# All Tasks Completed Animation
+
+Animation file:
+
+confetti.json
+
+Purpose:
+
+Celebrate when the user completes all tasks for the day.
+
+Behavior:
+
+If all tasks are completed
+→ Confetti animation plays
+→ A congratulatory message appears
+
+This moment reinforces the sense of achievement.
+
+---
+
+# Badge Unlock Animation (Planned)
+
+Future badge system will trigger special animations when achievements are unlocked.
+
+Example:
+
+Badge unlocked
+→ Celebration animation plays
+→ Badge appears with glow effect
+
+This will help reinforce the gamification aspect of the application.
+
+---
+
+# Animation Design Principles
+
+Animations in TodoApp follow several design principles.
+
+Purposeful
+Animations should occur only when they communicate meaningful events.
+
+Subtle
+Background animations should never distract from the main UI.
+
+Performance-friendly
+Animations should remain lightweight to ensure smooth performance on mobile devices.
+
+Rewarding
+Completion and achievement animations should feel satisfying and motivating.
+
+---
+
+# Future Animation Improvements
+
+Possible future enhancements include:
+
+Additional completion animations
+Interactive UI transitions
+Animated task movement during sorting
+Achievement and streak celebration animations
+
+These animations will be introduced gradually to maintain performance and clarity.
+
+---
+
+# Summary
+
+Animations play an important role in shaping the overall user experience of TodoApp.
+
+They are used to:
+
+* Enhance visual feedback
+* Celebrate user achievements
+* Create a calm and engaging interface
+* Support the app's anime-inspired aesthetic
+
+When used correctly, animations help transform the app from a simple task manager into a more immersive productivity experience.

@@ -1,0 +1,281 @@
+# TodoApp — Architecture
+
+## Overview
+
+TodoApp follows a **layered architecture** that separates the application into clear responsibilities.
+This structure keeps the codebase maintainable, scalable, and easy to understand.
+
+The application is divided into four primary layers:
+
+1. UI Layer
+2. Service Layer
+3. Storage Layer
+4. Utility Layer
+
+Each layer has a specific role and communicates only with the layers below it.
+
+---
+
+# 1. UI Layer
+
+The UI layer contains everything related to the visual interface of the app.
+
+This includes:
+
+* Screens
+* Components
+* Animations
+* Layout structure
+* Navigation
+
+The UI layer **never directly reads or writes storage**.
+Instead, it communicates with the Service Layer.
+
+### Responsibilities
+
+* Rendering task lists
+* Handling user input
+* Displaying task information
+* Triggering actions like add, edit, complete, delete
+* Displaying animations and visual feedback
+
+### Main Folders
+
+app/
+components/
+
+### Examples
+
+Screens:
+
+Home Screen
+Add Task Screen
+Reminders Screen
+Settings Screen
+Profile Screen
+
+Components:
+
+TaskCard
+CategoryChip
+SearchBar
+ProgressBar
+TagChip
+EnergyBadge
+
+---
+
+# 2. Service Layer
+
+The Service Layer contains the **business logic of the application**.
+
+This layer acts as the **bridge between the UI and the data storage system**.
+
+Instead of allowing UI components to manipulate storage directly, all task-related logic passes through service functions.
+
+### Responsibilities
+
+* Applying application rules
+* Filtering recurring tasks
+* Scheduling reminders
+* Triggering badges and streak updates
+* Preparing data before saving or displaying
+
+### Main Folder
+
+services/
+
+### Example Services
+
+TaskService
+Handles task creation, updates, completion, and deletion logic.
+
+ReminderService
+Handles scheduling and managing task notifications.
+
+BadgeService
+Checks conditions for unlocking achievements.
+
+---
+
+# 3. Storage Layer
+
+The Storage Layer is responsible for **data persistence**.
+
+Currently the app stores data locally using AsyncStorage.
+
+This layer does not contain business logic.
+It simply reads and writes data.
+
+### Responsibilities
+
+* Saving tasks
+* Retrieving tasks
+* Updating tasks
+* Removing tasks
+* Storing custom categories
+* Maintaining sort order
+
+### Main Folder
+
+storage/
+
+### Example Storage File
+
+TaskStorage.ts
+
+### Storage Technology
+
+AsyncStorage
+
+This allows tasks to remain available even after the app closes.
+
+---
+
+# 4. Utility Layer
+
+The Utility Layer contains pure helper functions.
+
+These functions perform calculations or formatting and do not modify application state.
+
+Utilities are reusable and independent of UI or storage.
+
+### Responsibilities
+
+* Date formatting
+* Sorting algorithms
+* Tag parsing
+* General helper functions
+
+### Main Folder
+
+utils/
+
+### Example Utilities
+
+dateUtils.ts
+Handles date comparisons, formatting, and grouping.
+
+sortUtils.ts
+Contains sorting logic for due date, priority, energy level, and manual ordering.
+
+tagUtils.ts
+Handles tag parsing and formatting.
+
+---
+
+# Data Flow
+
+The architecture follows a predictable data flow:
+
+User Interaction
+↓
+UI Layer (screens/components)
+↓
+Service Layer (business logic)
+↓
+Storage Layer (AsyncStorage)
+↓
+Data returned back through the layers
+↓
+UI updates
+
+This separation ensures the UI remains clean while logic stays organized.
+
+---
+
+# State Management
+
+TodoApp primarily uses **React state and context** for state management.
+
+Global state such as theme settings is handled through React Context.
+
+### Current Context
+
+ThemeContext
+
+This allows all screens to access theme settings without passing props through multiple layers.
+
+---
+
+# Navigation Architecture
+
+Navigation is handled using **Expo Router**, which uses file-based routing.
+
+Each file inside the `app/` directory automatically becomes a navigable screen.
+
+### Main Navigation Type
+
+Bottom Tab Navigation
+
+### Tabs
+
+Home
+Add Task
+Reminders
+Settings
+Profile
+
+Navigation configuration is located in:
+
+app/(tabs)/_layout.tsx
+
+---
+
+# Component Design Philosophy
+
+Components in TodoApp follow these principles:
+
+Reusable
+Small and focused
+Independent of business logic
+
+Components should primarily handle **display logic only**, while business rules are handled by services.
+
+---
+
+# Animation Architecture
+
+Animations are handled using **Lottie**.
+
+Animations are used only for specific moments to avoid overwhelming the interface.
+
+### Animation Events
+
+Splash intro
+Task completion sparkle
+All tasks completed confetti
+Background sakura animation on Home screen
+
+Animation files are stored in:
+
+assets/animations/
+
+---
+
+# Future Architecture Expansion
+
+As the application grows, additional systems will integrate with the existing architecture.
+
+Planned additions include:
+
+Firebase Authentication
+Firestore Database
+Push Notifications
+Badge Progress Tracking
+Streak Tracking
+
+These systems will integrate through the **Service Layer**, keeping the UI isolated from external APIs.
+
+---
+
+# Architectural Goals
+
+The architecture is designed to achieve the following:
+
+Maintainability
+Scalability
+Clear separation of concerns
+Easy onboarding for new developers or AI assistants
+
+This structure ensures that TodoApp remains organized as more features are added.

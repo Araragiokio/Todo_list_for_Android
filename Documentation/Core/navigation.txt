@@ -1,0 +1,266 @@
+# TodoApp — Navigation System
+
+## Overview
+
+TodoApp uses **Expo Router** for navigation. Expo Router is a file-based routing system built on top of React Navigation.
+
+With file-based routing, every file inside the `app/` directory automatically becomes a screen that can be navigated to.
+
+This approach simplifies navigation management and reduces the need for complex navigation configuration.
+
+---
+
+# Navigation Architecture
+
+The application uses a **Bottom Tab Navigation** structure as the main navigation system.
+
+The tab navigator allows users to quickly switch between the main sections of the app.
+
+Main navigation structure:
+
+Home
+Add Task
+Reminders
+Settings
+Profile
+
+The tab bar is persistent across all screens and is located at the bottom of the application.
+
+---
+
+# Navigation File Structure
+
+Navigation is controlled by files inside the `app/` directory.
+
+```
+app/
+│
+├── _layout.tsx
+│
+└── (tabs)/
+    ├── _layout.tsx
+    ├── index.tsx
+    ├── addtask.tsx
+    ├── reminders.tsx
+    ├── settings.tsx
+    └── profile.tsx
+```
+
+---
+
+# Root Layout
+
+File:
+
+app/_layout.tsx
+
+Responsibilities:
+
+* Wraps the entire application with global providers
+* Controls the splash screen logic
+* Provides the ThemeContext
+* Initializes the navigation system
+
+The root layout ensures all screens share the same global configuration.
+
+---
+
+# Tab Navigator
+
+File:
+
+app/(tabs)/_layout.tsx
+
+Responsibilities:
+
+* Defines the bottom tab navigation
+* Configures icons for each tab
+* Applies theme colors to the tab bar
+* Controls tab appearance and behavior
+
+The tab navigator defines the five main screens of the application.
+
+---
+
+# Main Screens
+
+## Home Screen
+
+File:
+
+app/(tabs)/index.tsx
+
+Purpose:
+
+The Home screen acts as the central hub of the application.
+
+Responsibilities:
+
+* Display active tasks
+* Display completed tasks
+* Provide search functionality
+* Provide category filters
+* Display progress bar
+* Provide sorting options
+
+---
+
+## Add Task Screen
+
+File:
+
+app/(tabs)/addtask.tsx
+
+Purpose:
+
+Allows the user to create new tasks.
+
+Responsibilities:
+
+* Input task title
+* Select category
+* Add tags
+* Set energy level
+* Set priority
+* Set due date
+* Add notes
+* Create subtasks
+* Configure recurring tasks
+
+After saving a task, the user is navigated back to the Home screen.
+
+---
+
+## Reminders Screen
+
+File:
+
+app/(tabs)/reminders.tsx
+
+Purpose:
+
+Displays scheduled reminders and notification-related information.
+
+Responsibilities:
+
+* Show upcoming reminders
+* Manage notification settings
+
+This screen will integrate with the notification system in later phases.
+
+---
+
+## Settings Screen
+
+File:
+
+app/(tabs)/settings.tsx
+
+Purpose:
+
+Allows the user to configure application preferences.
+
+Responsibilities:
+
+* Theme selection
+* Notification preferences
+* Sound settings
+* Animation preferences
+
+Additional configuration options will be added in later development phases.
+
+---
+
+## Profile Screen
+
+File:
+
+app/(tabs)/profile.tsx
+
+Purpose:
+
+Displays user statistics and profile information.
+
+Responsibilities:
+
+* Show user profile information
+* Display task completion statistics
+* Show streak information
+* Display earned badges
+
+This screen will later integrate with Firebase authentication.
+
+---
+
+# Navigation Behavior
+
+Navigation between screens is handled through Expo Router.
+
+Example navigation action:
+
+```
+router.push('/(tabs)/addtask')
+```
+
+This command opens the **Add Task screen**.
+
+Navigation is typically triggered by user interactions such as pressing buttons or selecting menu items.
+
+---
+
+# Floating Action Button Navigation
+
+The Home screen contains a **floating action button (+)** used to quickly add a new task.
+
+When pressed, the button navigates to the Add Task screen.
+
+Example behavior:
+
+Press "+" button
+→ Navigate to Add Task tab
+→ User creates task
+→ User returns to Home screen
+
+---
+
+# Tab Icons
+
+Each tab uses an icon from the **Ionicons** icon set.
+
+Example mapping:
+
+Home → home
+Add Task → add-circle
+Reminders → notifications
+Settings → settings
+Profile → person
+
+Icons visually help users recognize each section of the app.
+
+---
+
+# Navigation Design Goals
+
+The navigation system is designed to achieve the following:
+
+Simplicity
+Users should be able to access core features quickly.
+
+Consistency
+The tab bar remains visible at all times for easy navigation.
+
+Scalability
+Additional screens such as task editing or detailed views can be added later without disrupting the current structure.
+
+---
+
+# Future Navigation Expansion
+
+As the application grows, the navigation system may include additional elements such as:
+
+* Stack navigation for task editing screens
+* Modal screens for quick actions
+* Authentication flow for Firebase login
+* Deep linking support
+
+These enhancements will integrate with the existing Expo Router structure without major architectural changes.
