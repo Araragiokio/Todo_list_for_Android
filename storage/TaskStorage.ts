@@ -20,6 +20,8 @@ export const getTasks = async (): Promise<Task[]> => {
   }
 };
 
+import { scheduleTaskReminders } from '@/services/NotificationService';
+
 export const addTask = async (input: TaskInput): Promise<Task> => {
   try {
     const tasks = await getTasks();
@@ -42,6 +44,12 @@ export const addTask = async (input: TaskInput): Promise<Task> => {
     };
     const updated = [newTask, ...tasks];
     await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(updated));
+
+    // Auto schedule reminders if due date is set
+    if (input.dueDate) {
+      await scheduleTaskReminders(newTask.id, newTask.title, input.dueDate);
+    }
+
     return newTask;
   } catch (error) {
     throw error;
@@ -60,11 +68,14 @@ export const toggleTask = async (id: string): Promise<void> => {
   }
 };
 
+import { cancelTaskNotifications } from '@/services/NotificationService';
+
 export const deleteTask = async (id: string): Promise<void> => {
   try {
     const tasks = await getTasks();
     const updated = tasks.filter(task => task.id !== id);
     await AsyncStorage.setItem(TASKS_KEY, JSON.stringify(updated));
+    await cancelTaskNotifications(id);
   } catch (error) {
     throw error;
   }

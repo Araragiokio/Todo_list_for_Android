@@ -85,3 +85,46 @@ export const cancelAllNotifications = async (): Promise<void> => {
     console.log('Error canceling all scheduled notifications:', error);
   }
 };
+
+export const scheduleTaskReminders = async (
+  taskId: string,
+  taskTitle: string,
+  dueDate: string
+): Promise<void> => {
+  try {
+    const permitted = await checkNotificationPermission();
+    if (!permitted) return;
+
+    const due = new Date(dueDate);
+    const now = new Date();
+
+    const oneDayBefore = new Date(due.getTime() - 24 * 60 * 60 * 1000);
+    if (oneDayBefore > now) {
+      await scheduleNotification(
+        '⏰ Due Tomorrow',
+        `"${taskTitle}" is due tomorrow`,
+        oneDayBefore,
+        taskId
+      );
+    }
+
+    const oneHourBefore = new Date(due.getTime() - 60 * 60 * 1000);
+    if (oneHourBefore > now) {
+      await scheduleNotification(
+        '⚡ Due Soon',
+        `"${taskTitle}" is due in 1 hour`,
+        oneHourBefore,
+        taskId
+      );
+    }
+
+    if (due > now) {
+      await scheduleNotification(
+        '🔔 Task Due Now',
+        `"${taskTitle}" is due right now!`,
+        due,
+        taskId
+      );
+    }
+  } catch {}
+};
