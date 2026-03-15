@@ -13,9 +13,10 @@ import { Task } from '@/types/Task';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import LottieView from 'lottie-react-native';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   Alert,
+  Animated,
   Dimensions,
   Modal,
   ScrollView,
@@ -27,6 +28,7 @@ import {
 } from 'react-native';
 import DraggableFlatList from 'react-native-draggable-flatlist';
 import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import Reanimated, { SlideInDown } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
@@ -47,6 +49,9 @@ export default function HomeScreen() {
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [customCategories, setCustomCategories] = useState<any[]>([]);
+  const [sparkleTaskId, setSparkleTaskId] = useState<string | null>(null);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const progressAnim = useRef(new Animated.Value(0)).current;
 
   const allCategories = ['All', ...DEFAULT_CATEGORIES.map(c => c.name), ...customCategories.map(c => c.name)];
 
@@ -78,6 +83,14 @@ export default function HomeScreen() {
   const completedCount = tasks.filter(t => t.completed).length;
   const progress = tasks.length > 0 ? completedCount / tasks.length : 0;
 
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: progress,
+      duration: 350,
+      useNativeDriver: false,
+    }).start();
+  }, [progress, progressAnim]);
+
   const sortLabel = {
     due_date: 'Due Date',
     priority: 'Priority',
@@ -108,16 +121,24 @@ export default function HomeScreen() {
   };
 
   const handleToggle = async (id: string) => {
-    const prevTasks = await getActiveTasks();
-    const wasCompleted = prevTasks.find(t => t.id === id)?.completed ?? false;
     await toggleTask(id);
     await loadAll();
     const current = await getActiveTasks();
     const task = current.find(t => t.id === id);
     const nowCompleted = task?.completed ?? false;
     const allDone = current.length > 0 && current.every(t => t.completed);
-    if (allDone) setShowAllComplete(true);
-    else if (!wasCompleted && nowCompleted) setShowSingleComplete(true);
+
+    if (allDone) {
+      setShowCelebration(true);
+      setSparkleTaskId(null);
+      setShowAllComplete(true);
+    } else if (nowCompleted) {
+      setSparkleTaskId(id);
+      setShowCelebration(false);
+      setShowSingleComplete(true);
+    } else {
+      setSparkleTaskId(null);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -358,7 +379,18 @@ export default function HomeScreen() {
             </Text>
           </View>
           <View style={[styles.progressBar, { backgroundColor: colors.border }]}>
-            <View style={[styles.progressFill, { backgroundColor: colors.accent, width: `${progress * 100}%` }]} />
+            <Animated.View
+              style={[
+                styles.progressFill,
+                { backgroundColor: colors.accent },
+                {
+                  width: progressAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%'],
+                  }),
+                },
+              ]}
+            />
           </View>
         </View>
 
@@ -402,14 +434,22 @@ export default function HomeScreen() {
                 keyExtractor={(t) => t.id}
                 scrollEnabled={false}
                 renderItem={({ item, drag }) => (
-                  <TouchableOpacity onLongPress={drag} delayLongPress={200}>
-                    {renderTask({ item })}
-                  </TouchableOpacity>
+                  <Reanimated.View entering={SlideInDown.duration(300).springify()} style={{ marginBottom: 8 }}>
+                    <TouchableOpacity onLongPress={drag} delayLongPress={200}>
+                      {renderTask({ item })}
+                    </TouchableOpacity>
+                  </Reanimated.View>
                 )}
               />
             ) : (
               activeListForDisplay.map(task => (
-                <View key={task.id}>{renderTask({ item: task })}</View>
+                <Reanimated.View
+                  key={task.id}
+                  entering={SlideInDown.duration(300).springify()}
+                  style={{ marginBottom: 8 }}
+                >
+                  {renderTask({ item: task })}
+                </Reanimated.View>
               ))
             )}
           </>
@@ -446,7 +486,11 @@ export default function HomeScreen() {
                 color={colors.subtext}
               />
             </TouchableOpacity>
-            {showCompleted && completedTasks.map(task => renderTask({ item: task }))}
+            {showCompleted && completedTasks.map(task => (
+              <Reanimated.View key={task.id} entering={SlideInDown.duration(300).springify()} style={{ marginBottom: 8 }}>
+                {renderTask({ item: task })}
+              </Reanimated.View>
+            ))}
           </>
         )}
 
@@ -491,6 +535,29 @@ export default function HomeScreen() {
           </View>
         </TouchableOpacity>
       </Modal>
+
+      {sparkleTaskId && (
+  <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { zIndex: 999 }]}>
+    <LottieView
+      source={require('@/assets/animations/confetties.json')}
+      autoPlay
+      loop={false}
+      style={StyleSheet.absoluteFillObject}
+      onAnimationFinish={() => setSparkleTaskId(null)}
+    />
+  </View>
+)}
+      {showCelebration && (
+  <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { zIndex: 999 }]}>
+    <LottieView
+      source={require('@/assets/animations/celebrations-begin.json')}
+      autoPlay
+      loop={false}
+      style={StyleSheet.absoluteFillObject}
+      onAnimationFinish={() => setShowCelebration(false)}
+    />
+  </View>
+)}
 
     </View>
     </GestureHandlerRootView>
