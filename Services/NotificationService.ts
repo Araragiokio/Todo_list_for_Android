@@ -3,6 +3,7 @@ import cancelScheduledNotificationAsync from "expo-notifications/build/cancelSch
 import getAllScheduledNotificationsAsync from "expo-notifications/build/getAllScheduledNotificationsAsync";
 import { getPermissionsAsync, requestPermissionsAsync } from "expo-notifications/build/NotificationPermissions";
 import scheduleNotificationAsync from "expo-notifications/build/scheduleNotificationAsync";
+import * as Notifications from 'expo-notifications';
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   try {
@@ -125,6 +126,38 @@ export const scheduleTaskReminders = async (
         due,
         taskId
       );
+    }
+  } catch {}
+};
+
+// Schedule overdue alert — fires if task not completed by due time
+export const scheduleOverdueAlert = async (
+  taskId: string,
+  taskTitle: string,
+  dueDate: string
+): Promise<void> => {
+  try {
+    const permitted = await checkNotificationPermission();
+    if (!permitted) return;
+
+    const due = new Date(dueDate);
+    const now = new Date();
+
+    // Schedule 15 minutes after due time
+    const overdueTime = new Date(due.getTime() + 15 * 60 * 1000);
+    if (overdueTime > now) {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: '⚠️ Task Overdue!',
+          body: `"${taskTitle}" is overdue. Don't give up! 🗡️`,
+          sound: 'default',
+          data: { taskId, type: 'overdue' },
+        },
+        trigger: {
+          type: Notifications.SchedulableTriggerInputTypes.DATE,
+          date: overdueTime,
+        },
+      });
     }
   } catch {}
 };

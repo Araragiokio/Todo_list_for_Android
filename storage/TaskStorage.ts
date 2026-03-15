@@ -1,5 +1,10 @@
 import { Subtask, Task, TaskInput } from '@/types/Task';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {
+  scheduleTaskReminders,
+  scheduleOverdueAlert,
+  cancelTaskNotifications,
+} from '@/services/NotificationService';
 
 const TASKS_KEY = 'tasks';
 const CUSTOM_CATEGORIES_KEY = 'custom_categories';
@@ -20,7 +25,6 @@ export const getTasks = async (): Promise<Task[]> => {
   }
 };
 
-import { scheduleTaskReminders } from '@/services/NotificationService';
 
 export const addTask = async (input: TaskInput): Promise<Task> => {
   try {
@@ -47,8 +51,9 @@ export const addTask = async (input: TaskInput): Promise<Task> => {
 
     // Auto schedule reminders if due date is set
     if (input.dueDate) {
-      await scheduleTaskReminders(newTask.id, newTask.title, input.dueDate);
-    }
+  await scheduleTaskReminders(newTask.id, newTask.title, input.dueDate);
+  await scheduleOverdueAlert(newTask.id, newTask.title, input.dueDate);
+}
 
     return newTask;
   } catch (error) {
@@ -68,7 +73,6 @@ export const toggleTask = async (id: string): Promise<void> => {
   }
 };
 
-import { cancelTaskNotifications } from '@/services/NotificationService';
 
 export const deleteTask = async (id: string): Promise<void> => {
   try {
