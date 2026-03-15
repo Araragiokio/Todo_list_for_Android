@@ -38,6 +38,13 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="edittask"
+        options={{
+          href: null,
+          title: 'Edit Task',
+        }}
+      />
+      <Tabs.Screen
         name="reminders"
         options={{
           title: 'Reminders',

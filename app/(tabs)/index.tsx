@@ -4,13 +4,16 @@ import {
   deleteTask,
   getActiveTasks,
   getCustomCategories,
-  toggleTask
+  getTasks,
+  toggleSubtask,
+  toggleTask,
+  updateSortOrder,
 } from '@/storage/TaskStorage';
 import { Task } from '@/types/Task';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import LottieView from 'lottie-react-native';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
   Dimensions,
@@ -20,8 +23,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View
+  View,
 } from 'react-native';
+import DraggableFlatList from 'react-native-draggable-flatlist';
+import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
 
 const { width, height } = Dimensions.get('window');
 
@@ -35,71 +40,14 @@ export default function HomeScreen() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState('All');
   const [search, setSearch] = useState('');
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [showSingleComplete, setShowSingleComplete] = useState(false);
+  const [showAllComplete, setShowAllComplete] = useState(false);
   const [sort, setSort] = useState<SortType>('created');
+  const [manualOrderedActive, setManualOrderedActive] = useState<Task[]>([]);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
   const [customCategories, setCustomCategories] = useState<any[]>([]);
 
-  useFocusEffect(
-    useCallback(() => {
-      loadAll();
-    }, [])
-  );
-
-  const loadAll = async () => {
-    const loaded = await getActiveTasks();
-    const custom = await getCustomCategories();
-    setTasks(loaded);
-    setCustomCategories(custom);
-  };
-
-  const handleToggle = async (id: string) => {
-    await toggleTask(id);
-    await loadAll();
-    const current = await getActiveTasks();
-    const allDone = current.length > 0 && current.every(t => t.completed);
-    if (allDone) setShowConfetti(true);
-  };
-
-  const handleDelete = async (id: string) => {
-    Alert.alert('Delete Task', 'Are you sure?', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete', style: 'destructive',
-        onPress: async () => {
-          await deleteTask(id);
-          loadAll();
-        }
-      }
-    ]);
-  };
-
-  const getGreeting = () => {
-    const h = new Date().getHours();
-    if (h < 12) return 'Good morning';
-    if (h < 17) return 'Good afternoon';
-    return 'Good evening';
-  };
-
-  const getPriorityColor = (p: string) => {
-    if (p === 'high') return colors.danger;
-    if (p === 'medium') return colors.warning;
-    return colors.success;
-  };
-
-  const getEnergyLabel = (e: string | null) => {
-    if (!e) return null;
-    const map: any = {
-      deep_work: '🧠 Deep Work',
-      quick_task: '⚡ Quick',
-      low_energy: '💤 Low Energy',
-      focus: '🎯 Focus',
-    };
-    return map[e] || null;
-  };
-
-  // Filter + sort logic
   const allCategories = ['All', ...DEFAULT_CATEGORIES.map(c => c.name), ...customCategories.map(c => c.name)];
 
   const filteredTasks = tasks.filter(task => {
@@ -138,16 +86,120 @@ export default function HomeScreen() {
     manual: 'Manual',
   }[sort];
 
-  const renderTask = ({ item }: { item: Task }) => {
+  const activeListForDisplay = sort === 'manual' && manualOrderedActive.length > 0
+    ? manualOrderedActive
+    : sortedActive;
+
+  useFocusEffect(
+    useCallback(() => {
+      loadAll();
+    }, [])
+  );
+
+  useEffect(() => {
+    if (sort === 'manual') setManualOrderedActive([...sortedActive]);
+  }, [sort, sortedActive.length]);
+
+  const loadAll = async () => {
+    const loaded = await getActiveTasks();
+    const custom = await getCustomCategories();
+    setTasks(loaded);
+    setCustomCategories(custom);
+  };
+
+  const handleToggle = async (id: string) => {
+    const prevTasks = await getActiveTasks();
+    const wasCompleted = prevTasks.find(t => t.id === id)?.completed ?? false;
+    await toggleTask(id);
+    await loadAll();
+    const current = await getActiveTasks();
+    const task = current.find(t => t.id === id);
+    const nowCompleted = task?.completed ?? false;
+    const allDone = current.length > 0 && current.every(t => t.completed);
+    if (allDone) setShowAllComplete(true);
+    else if (!wasCompleted && nowCompleted) setShowSingleComplete(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    Alert.alert('Delete Task', 'Are you sure?', [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteTask(id);
+          loadAll();
+        },
+      },
+    ]);
+  };
+
+  const handleSubtaskToggle = async (taskId: string, subtaskId: string) => {
+    const prevTasks = await getActiveTasks();
+    const task = prevTasks.find(t => t.id === taskId);
+    const wasCompleted = task?.completed ?? false;
+    await toggleSubtask(taskId, subtaskId);
+    await loadAll();
+    const current = await getActiveTasks();
+    const updated = current.find(t => t.id === taskId);
+    const nowCompleted = updated?.completed ?? false;
+    const allDone = current.length > 0 && current.every(t => t.completed);
+    if (allDone) setShowAllComplete(true);
+    else if (!wasCompleted && nowCompleted) setShowSingleComplete(true);
+  };
+
+  const getGreeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  };
+
+  const getPriorityColor = (p: string) => {
+    if (p === 'high') return colors.danger;
+    if (p === 'medium') return colors.warning;
+    return colors.success;
+  };
+
+  const getEnergyLabel = (e: string | null) => {
+    if (!e) return null;
+    const map: any = {
+      deep_work: '🧠 Deep Work',
+      quick_task: '⚡ Quick',
+      low_energy: '💤 Low Energy',
+      focus: '🎯 Focus',
+    };
+    return map[e] || null;
+  };
+
+  const handleManualDragEnd = useCallback(async ({ data }: { data: Task[] }) => {
+    setManualOrderedActive(data);
+    const all = await getTasks();
+    const others = all.filter(t => !data.some(d => d.id === t.id));
+    await updateSortOrder([...data, ...others]);
+    loadAll();
+  }, []);
+
+  const renderRightActions = (item: Task) => () => (
+    <TouchableOpacity
+      style={[styles.swipeDelete, { backgroundColor: colors.danger }]}
+      onPress={() => handleDelete(item.id)}
+    >
+      <Ionicons name="trash-outline" size={22} color="#fff" />
+      <Text style={styles.swipeDeleteText}>Delete</Text>
+    </TouchableOpacity>
+  );
+
+  const renderTaskContent = (item: Task) => {
     const catInfo = getCategoryInfo(item.category, customCategories);
     return (
-      <View key={item.id} style={[styles.taskCard, { backgroundColor: colors.card }]}>
+      <>
         <View style={[styles.priorityStrip, { backgroundColor: getPriorityColor(item.priority) }]} />
         <View style={styles.taskContent}>
           <Text style={[
             styles.taskTitle,
             { color: colors.text },
-            item.completed && { textDecorationLine: 'line-through', opacity: 0.5 }
+            item.completed && { textDecorationLine: 'line-through', opacity: 0.5 },
           ]}>
             {item.title}
           </Text>
@@ -165,7 +217,7 @@ export default function HomeScreen() {
               </Text>
             )}
           </View>
-            {(item.tags ?? []).length > 0 && (
+          {(item.tags ?? []).length > 0 && (
             <View style={styles.tagRow}>
               {(item.tags ?? []).map(tag => (
                 <View key={tag} style={[styles.tag, { backgroundColor: colors.accent + '20' }]}>
@@ -175,13 +227,30 @@ export default function HomeScreen() {
             </View>
           )}
           {(item.subtasks ?? []).length > 0 && (
-            <Text style={[styles.subtaskProgress, { color: colors.subtext }]}
-            >
-              {(item.subtasks ?? []).filter(s => s.completed).length}/{(item.subtasks ?? []).length} subtasks
-            </Text>
+            <View style={styles.subtaskList}>
+              {(item.subtasks ?? []).map(st => (
+                <TouchableOpacity
+                  key={st.id}
+                  style={styles.subtaskRow}
+                  onPress={() => handleSubtaskToggle(item.id, st.id)}
+                >
+                  <View style={[styles.subtaskCheck, { borderColor: colors.border }, st.completed && { backgroundColor: colors.accent }]}>
+                    {st.completed && <Ionicons name="checkmark" size={12} color="#fff" />}
+                  </View>
+                  <Text style={[styles.subtaskRowText, { color: colors.text }, st.completed && { textDecorationLine: 'line-through', opacity: 0.7 }]}>
+                    {st.title}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           )}
         </View>
         <View style={styles.taskActions}>
+          <TouchableOpacity
+            onPress={() => router.push({ pathname: '/(tabs)/edittask', params: { id: item.id } })}
+          >
+            <Ionicons name="pencil-outline" size={18} color={colors.subtext} />
+          </TouchableOpacity>
           <TouchableOpacity
             onPress={() => handleToggle(item.id)}
             style={[styles.checkBtn, {
@@ -195,11 +264,23 @@ export default function HomeScreen() {
             <Ionicons name="trash-outline" size={16} color={colors.danger} />
           </TouchableOpacity>
         </View>
-      </View>
+      </>
     );
   };
 
+  const renderTask = ({ item }: { item: Task }) => (
+    <Swipeable
+      renderRightActions={renderRightActions(item)}
+      overshootRight={false}
+    >
+      <View style={[styles.taskCard, { backgroundColor: colors.card }]}>
+        {renderTaskContent(item)}
+      </View>
+    </Swipeable>
+  );
+
   return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
     <View style={[styles.container, { backgroundColor: colors.background }]}>
 
       {/* Sakura background */}
@@ -211,13 +292,22 @@ export default function HomeScreen() {
         resizeMode="cover"
         speed={0.4}
       />
-      {showConfetti && (
+      {showSingleComplete && (
         <LottieView
-          source={require('@/assets/animations/confetti.json')}
+          source={require('@/assets/animations/confetties.json')}
           autoPlay
           loop={false}
           style={StyleSheet.absoluteFillObject}
-          onAnimationFinish={() => setShowConfetti(false)}
+          onAnimationFinish={() => setShowSingleComplete(false)}
+        />
+      )}
+      {showAllComplete && (
+        <LottieView
+          source={require('@/assets/animations/celebrations-begin.json')}
+          autoPlay
+          loop={false}
+          style={StyleSheet.absoluteFillObject}
+          onAnimationFinish={() => setShowAllComplete(false)}
         />
       )}
 
@@ -302,10 +392,26 @@ export default function HomeScreen() {
         </View>
 
         {/* Active tasks */}
-        {sortedActive.length > 0 && (
+        {activeListForDisplay.length > 0 && (
           <>
             <Text style={[styles.sectionTitle, { color: colors.subtext }]}>Active</Text>
-            {sortedActive.map(task => renderTask({ item: task }))}
+            {sort === 'manual' ? (
+              <DraggableFlatList
+                data={activeListForDisplay}
+                onDragEnd={handleManualDragEnd}
+                keyExtractor={(t) => t.id}
+                scrollEnabled={false}
+                renderItem={({ item, drag }) => (
+                  <TouchableOpacity onLongPress={drag} delayLongPress={200}>
+                    {renderTask({ item })}
+                  </TouchableOpacity>
+                )}
+              />
+            ) : (
+              activeListForDisplay.map(task => (
+                <View key={task.id}>{renderTask({ item: task })}</View>
+              ))
+            )}
           </>
         )}
 
@@ -387,6 +493,7 @@ export default function HomeScreen() {
       </Modal>
 
     </View>
+    </GestureHandlerRootView>
   );
 }
 
@@ -466,7 +573,12 @@ const styles = StyleSheet.create({
   tagRow: { flexDirection: 'row', gap: 4, marginTop: 6, flexWrap: 'wrap' },
   tag: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 10 },
   tagText: { fontSize: 11, fontWeight: '500' },
-  subtaskProgress: { fontSize: 11, marginTop: 4 },
+  subtaskList: { marginTop: 6 },
+  subtaskRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+  subtaskCheck: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, marginRight: 8, alignItems: 'center', justifyContent: 'center' },
+  subtaskRowText: { fontSize: 13, flex: 1 },
+  swipeDelete: { justifyContent: 'center', alignItems: 'center', width: 80, borderRadius: 14, marginBottom: 10 },
+  swipeDeleteText: { color: '#fff', fontSize: 12, fontWeight: '600', marginTop: 4 },
   taskActions: {
     alignItems: 'center', justifyContent: 'center',
     paddingRight: 12, gap: 10,
@@ -480,7 +592,7 @@ const styles = StyleSheet.create({
     alignItems: 'center', marginBottom: 8,
   },
   emptyState: { alignItems: 'center', marginTop: 40 },
-  emptyAnimation: { width: 260, height: 260 },
+  emptyAnimation: { width: 300, height: 300 },
   emptyText: { fontSize: 16, marginTop: 12, textAlign: 'center' },
   fab: {
     position: 'absolute', bottom: 80, right: 20,
