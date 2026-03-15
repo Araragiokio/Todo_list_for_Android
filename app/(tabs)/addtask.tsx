@@ -133,20 +133,37 @@ export default function AddTaskScreen() {
   };
 
   const showDatePicker = () => {
-    if (Platform.OS === 'android') {
-      DateTimePickerAndroid.open({
-        value: dueDate ? new Date(dueDate) : new Date(),
-        mode: 'date',
-        onChange: (_event, selectedDate) => {
-          if (selectedDate) {
-            setDueDate(selectedDate.toISOString());
-          }
-        },
-      });
-    } else {
-      Alert.alert('Coming Soon', 'Date picker is currently supported on Android only.');
-    }
-  };
+  if (Platform.OS === 'android') {
+    DateTimePickerAndroid.open({
+      value: dueDate ? new Date(dueDate) : new Date(),
+      mode: 'date',
+      onChange: (event, selectedDate) => {
+        if (event.type === 'dismissed') return;
+        if (selectedDate) {
+          // Step 2 — immediately open time picker after date selected
+          DateTimePickerAndroid.open({
+            value: selectedDate,
+            mode: 'time',
+            is24Hour: false,
+            onChange: (timeEvent, selectedTime) => {
+              if (timeEvent.type === 'dismissed') return;
+              if (selectedTime) {
+                // Combine date + time into one ISO string
+                const combined = new Date(selectedDate);
+                combined.setHours(selectedTime.getHours());
+                combined.setMinutes(selectedTime.getMinutes());
+                combined.setSeconds(0);
+                setDueDate(combined.toISOString());
+              }
+            },
+          });
+        }
+      },
+    });
+  } else {
+    Alert.alert('Coming Soon', 'Date picker is currently supported on Android only.');
+  }
+};
 
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'No date';
