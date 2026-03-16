@@ -127,7 +127,7 @@ export const scheduleTaskReminders = async (
         taskId
       );
     }
-  } catch {}
+  } catch { }
 };
 
 // Schedule overdue alert — fires if task not completed by due time
@@ -159,5 +159,55 @@ export const scheduleOverdueAlert = async (
         },
       });
     }
-  } catch {}
+  } catch { }
 };
+
+export const scheduleMorningDigest = async (
+  hour: number = 8,
+  minute: number = 0
+): Promise<void> => {
+  try {
+    const permitted = await checkNotificationPermission();
+    if (!permitted) return;
+
+    const scheduled = await Notifications.getAllScheduledNotificationsAsync();
+    for (const n of scheduled) {
+      if (n.content.data?.type === 'morning_digest') {
+        await Notifications.cancelScheduledNotificationAsync(n.identifier);
+      }
+    }
+
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: '☀️ Good Morning, Araragi!',
+        body: "Here's your daily mission. Let's go! 🗡️",
+        sound: 'default',
+        data: { type: 'morning_digest' },
+        categoryIdentifier: 'morning_digest',
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DAILY,
+        hour,
+        minute,
+      },
+    });
+  } catch { }
+};
+
+export const snoozeNotification = async (minutes: number = 10) => {
+  const date = new Date(Date.now() + minutes * 60 * 1000);
+
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: '⏰ Snoozed Reminder',
+      body: "Don't forget your tasks!",
+      sound: 'default',
+    },
+    trigger: {
+      type: Notifications.SchedulableTriggerInputTypes.DATE,
+      date,
+    },
+  });
+};
+
+  
