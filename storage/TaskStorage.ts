@@ -1,4 +1,4 @@
-import { Subtask, Task, TaskInput } from '@/types/Task';
+import { Subtask, Task, TaskInput } from '@/Types/Task';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   scheduleTaskReminders,
