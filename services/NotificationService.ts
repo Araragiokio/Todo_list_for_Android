@@ -1,13 +1,8 @@
-import cancelAllScheduledNotificationsAsync from "expo-notifications/build/cancelAllScheduledNotificationsAsync";
-import cancelScheduledNotificationAsync from "expo-notifications/build/cancelScheduledNotificationAsync";
-import getAllScheduledNotificationsAsync from "expo-notifications/build/getAllScheduledNotificationsAsync";
-import { getPermissionsAsync, requestPermissionsAsync } from "expo-notifications/build/NotificationPermissions";
-import scheduleNotificationAsync from "expo-notifications/build/scheduleNotificationAsync";
 import * as Notifications from 'expo-notifications';
 
 export const requestNotificationPermission = async (): Promise<boolean> => {
   try {
-    const { status } = await requestPermissionsAsync();
+    const { status } = await Notifications.requestPermissionsAsync();
     if (status !== 'granted') {
       console.log('Notification permission denied');
       return false;
@@ -21,7 +16,7 @@ export const requestNotificationPermission = async (): Promise<boolean> => {
 
 export const checkNotificationPermission = async (): Promise<boolean> => {
   try {
-    const { status } = await getPermissionsAsync();
+    const { status } = await Notifications.getPermissionsAsync();
     return status === 'granted';
   } catch (error) {
     console.log('Error checking notification permission:', error);
@@ -39,7 +34,7 @@ export const scheduleNotification = async (
     const permitted = await checkNotificationPermission();
     if (!permitted || date <= new Date()) return null;
 
-    const id = await scheduleNotificationAsync({
+    const id = await Notifications.scheduleNotificationAsync({
       content: {
         title,
         body,
@@ -47,7 +42,7 @@ export const scheduleNotification = async (
         data: { taskId },
       },
       trigger: {
-        type: 'date' as any,
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
         date,
       },
     });
@@ -60,7 +55,7 @@ export const scheduleNotification = async (
 
 export const cancelNotification = async (notificationId: string): Promise<void> => {
   try {
-    await cancelScheduledNotificationAsync(notificationId);
+    await Notifications.cancelScheduledNotificationAsync(notificationId);
   } catch (error) {
     console.log('Error canceling scheduled notification:', error);
   }
@@ -68,11 +63,11 @@ export const cancelNotification = async (notificationId: string): Promise<void> 
 
 export const cancelTaskNotifications = async (taskId: string): Promise<void> => {
   try {
-    const notifications = await getAllScheduledNotificationsAsync();
+    const notifications = await Notifications.getAllScheduledNotificationsAsync();
     await Promise.all(
       notifications
         .filter(n => n.content.data?.taskId === taskId)
-        .map(n => cancelScheduledNotificationAsync(n.identifier))
+        .map(n => Notifications.cancelScheduledNotificationAsync(n.identifier))
     );
   } catch (error) {
     console.log('Error canceling task notifications:', error);
@@ -81,7 +76,7 @@ export const cancelTaskNotifications = async (taskId: string): Promise<void> => 
 
 export const cancelAllNotifications = async (): Promise<void> => {
   try {
-    await cancelAllScheduledNotificationsAsync();
+    await Notifications.cancelAllScheduledNotificationsAsync();
   } catch (error) {
     console.log('Error canceling all scheduled notifications:', error);
   }
@@ -127,7 +122,9 @@ export const scheduleTaskReminders = async (
         taskId
       );
     }
-  } catch { }
+  } catch (error) {
+    console.log('Error scheduling task reminders:', error);
+  }
 };
 
 // Schedule overdue alert — fires if task not completed by due time
@@ -159,7 +156,9 @@ export const scheduleOverdueAlert = async (
         },
       });
     }
-  } catch { }
+  } catch (error) {
+    console.log('Error scheduling overdue alert:', error);
+  }
 };
 
 export const scheduleMorningDigest = async (
@@ -191,7 +190,9 @@ export const scheduleMorningDigest = async (
         minute,
       },
     });
-  } catch { }
+  } catch (error) {
+    console.log('Error scheduling morning digest:', error);
+  }
 };
 
 export const snoozeNotification = async (minutes: number = 10) => {

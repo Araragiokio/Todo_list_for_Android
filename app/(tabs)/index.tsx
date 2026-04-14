@@ -9,7 +9,7 @@ import {
   toggleTask,
   updateSortOrder,
 } from '@/storage/TaskStorage';
-import { Task } from '@/types/Task';
+import { Task } from '@/Types/Task';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
 import LottieView from 'lottie-react-native';
