@@ -210,5 +210,3 @@ export const snoozeNotification = async (minutes: number = 10) => {
     },
   });
 };
-
-  
