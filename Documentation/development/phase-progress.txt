@@ -1,0 +1,152 @@
+# TodoApp - Development Progress
+
+## Overview
+
+This document tracks the active development direction of TodoApp.
+
+The project is organized into phases so the team can evolve the product in a clear and scalable order.
+
+---
+
+# Current Roadmap
+
+## Phase 1 - Core UI and Task System
+
+Status: Completed
+
+Scope:
+
+* Base project setup
+* Home experience foundation
+* Task model and storage
+* Core task creation and management flow
+
+Outcome:
+
+The app has a working foundation for task-focused interaction.
+
+---
+
+## Phase 2 - Navigation Restructuring
+
+Status: Completed
+
+Scope:
+
+* Bottom navigation updated
+* Settings removed from bottom tabs
+* Analytics tab added
+* Navigation simplified for better UX and future scalability
+
+Final tab order:
+
+Home | Add Task | Reminders | Analytics | Profile
+
+Settings access:
+
+Profile top-right icon
+
+Outcome:
+
+The information architecture is cleaner and each tab now owns a clearer responsibility.
+
+---
+
+## Phase 3 - Analytics UI Skeleton
+
+Status: Current
+
+Scope:
+
+* Analytics screen shell
+* Placeholder chart sections
+* Layout for future insights
+* No real analytics data processing yet
+
+Expected UI areas:
+
+* Category distribution
+* Weekly performance
+* Consistency tracking
+* Smart insights
+
+Outcome:
+
+The app gains a dedicated space for performance features before data logic is added.
+
+---
+
+## Phase 4 - Data Processing for Charts
+
+Status: Planned
+
+Scope:
+
+* Completed task grouping by category
+* Weekly completion aggregation
+* Heatmap consistency dataset generation
+* Time filters for analytics views
+
+Outcome:
+
+Charts will be backed by real user data rather than placeholders.
+
+---
+
+## Phase 5 - Smart Insights and Advanced Features
+
+Status: Planned
+
+Scope:
+
+* Text-based productivity insights
+* Category focus summaries
+* Pattern detection
+* Streak-aware insight generation
+* Advanced analytics improvements
+
+Outcome:
+
+Analytics becomes interpretive, not just visual.
+
+---
+
+# Screen Responsibility Alignment
+
+Home
+Displays tasks and the main dashboard.
+
+Add Task
+Creates and manages new tasks.
+
+Reminders
+Shows scheduled and overdue tasks.
+
+Analytics
+Displays user productivity insights and data visualization.
+
+Profile
+Displays identity, personal metrics, and settings access.
+
+---
+
+# Developer Notes
+
+* Keep navigation clean and minimal
+* Use proper safe area handling
+* Avoid hardcoded layout hacks such as `marginTop` used to fake spacing
+* Do not overload one screen with mixed responsibilities
+
+---
+
+# Current Focus
+
+Current phase:
+
+Phase 3 - Analytics UI Skeleton
+
+Next milestone:
+
+Phase 4 - Data Processing for Charts
+
+The current goal is to establish the analytics presentation layer first, then connect it to real task-derived datasets.

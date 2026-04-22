@@ -1,0 +1,319 @@
+# TodoApp — Task Data Model
+
+## Overview
+
+The Task Data Model defines how tasks are structured and stored within TodoApp.
+
+Each task is represented as a structured object that contains all necessary information for displaying, sorting, filtering, and managing tasks within the application.
+
+The model is implemented using **TypeScript interfaces** to ensure type safety and consistent data handling across the project.
+
+The task data model is defined in:
+
+types/Task.ts
+
+---
+
+# Core Task Structure
+
+Every task stored in the application follows the structure below.
+
+```id="task_interface"
+export type Priority = 'high' | 'medium' | 'low';
+export type EnergyLevel = 'deep_work' | 'quick_task' | 'low_energy' | 'focus';
+export type RecurringType = 'daily' | 'weekly' | 'monthly' | 'yearly' | null;
+
+export interface Subtask {
+  id: string;
+  title: string;
+  completed: boolean;
+}
+
+export interface Task {
+  id: string;
+  title: string;
+  category: string;
+  tags: string[];
+  energyLevel: EnergyLevel | null;
+  priority: Priority;
+  dueDate: string | null;
+  reminder: string | null;
+  notes: string;
+  subtasks: Subtask[];
+  completed: boolean;
+  createdAt: string;
+  recurring: RecurringType;
+  recurringDay: string | null;
+  sortOrder: number;
+}
+
+export interface TaskInput {
+  title: string;
+  category: string;
+  tags: string[];
+  energyLevel: EnergyLevel | null;
+  priority: Priority;
+  dueDate: string | null;
+  reminder: string | null;
+  notes: string;
+  subtasks: Subtask[];
+  recurring: RecurringType;
+  recurringDay: string | null;
+}
+```
+
+---
+
+# Task Fields Explained
+
+## id
+
+Type: string
+
+A unique identifier assigned to each task.
+
+Purpose:
+
+* Distinguish tasks from one another
+* Used when updating, editing, or deleting tasks
+
+The id is generated automatically when a new task is created.
+
+---
+
+## title
+
+Type: string
+
+The main name or description of the task.
+
+Example:
+
+Finish React assignment
+
+This field is required when creating a task.
+
+---
+
+## category
+
+Type: string
+
+Represents the category to which the task belongs.
+
+Examples:
+
+Work / Career
+Education
+Health & Fitness
+Self-Improvement
+
+Categories help users organize tasks by type of activity.
+
+---
+
+## tags
+
+Type: string[]
+
+An array of tag labels attached to a task.
+
+Example:
+
+#coding
+#deepwork
+#study
+
+Tags allow flexible searching and grouping beyond categories.
+
+---
+
+## energyLevel
+
+Type: EnergyLevel | null
+
+Indicates the amount of mental or physical energy required to complete the task.
+
+Possible values:
+
+deep_work
+focus
+quick_task
+low_energy
+
+If no energy level is selected, the value remains null.
+
+---
+
+## priority
+
+Type: Priority
+
+Defines the importance level of the task.
+
+Possible values:
+
+high
+medium
+low
+
+Priority affects how tasks are sorted and visually displayed.
+
+---
+
+## dueDate
+
+Type: string | null
+
+Stores the deadline for completing the task.
+
+The date is saved as an **ISO date string**.
+
+Example:
+
+2026-03-20T14:00:00.000Z
+
+If the task has no deadline, this value is null.
+
+---
+
+## reminder
+
+Type: string | null
+
+Stores the reminder time associated with the task.
+
+This field is used by the notification system to schedule alerts.
+
+If no reminder is set, this value remains null.
+
+---
+
+## notes
+
+Type: string
+
+Allows the user to store additional information related to the task.
+
+Example:
+
+Remember to include references and diagrams.
+
+Notes are optional but useful for complex tasks.
+
+---
+
+## subtasks
+
+Type: Subtask[]
+
+Represents smaller steps required to complete the main task.
+
+Each subtask contains:
+
+id — unique identifier
+title — subtask description
+completed — completion status
+
+Subtasks allow large tasks to be broken down into manageable pieces.
+
+---
+
+## completed
+
+Type: boolean
+
+Indicates whether the task has been completed.
+
+true → task finished
+false → task still active
+
+Completed tasks are displayed in a separate section on the Home screen.
+
+---
+
+## createdAt
+
+Type: string
+
+Stores the timestamp when the task was created.
+
+This value is automatically generated when the task is saved.
+
+Example:
+
+2026-03-14T10:30:00.000Z
+
+Used for sorting tasks by creation time.
+
+---
+
+## recurring
+
+Type: RecurringType
+
+Defines whether the task repeats on a schedule.
+
+Possible values:
+
+daily
+weekly
+monthly
+yearly
+
+If the task does not repeat, the value is null.
+
+---
+
+## recurringDay
+
+Type: string | null
+
+Stores the specific day associated with recurring tasks.
+
+Examples:
+
+Monday (for weekly recurrence)
+15 (for monthly recurrence)
+
+If the task is not recurring, this value is null.
+
+---
+
+## sortOrder
+
+Type: number
+
+Defines the manual order of tasks when using drag-and-drop sorting.
+
+Lower values appear earlier in the task list.
+
+This field allows the application to persist user-defined task order.
+
+---
+
+# TaskInput Model
+
+TaskInput represents the data collected from the **Add Task screen** before a task is saved.
+
+It does not include system-generated properties such as:
+
+id
+completed
+createdAt
+sortOrder
+
+These fields are automatically added when the task is stored.
+
+---
+
+# Why This Model Exists
+
+The task data model provides several important benefits:
+
+Consistency — every task follows the same structure
+Type safety — TypeScript prevents invalid data types
+Scalability — new fields can be added easily
+Maintainability — developers can understand the task structure quickly
+
+This model forms the **core foundation of the TodoApp task system**.

@@ -1,0 +1,29 @@
+TodoApp/
+docs/
+│
+├── core/            ← permanent information
+│
+├── development/     ← changes as you build
+│
+└── ai-context/      ← optional but very powerful
+
+core/
+├── project-overview.md
+├── architecture.md
+├── folder-structure.md
+├── navigation.md
+├── theme-system.md
+├── libraries.md
+├── task-data-model.md
+├── categories.md
+├── animations.md
+
+development/
+├── phase-progress.md
+├── phase3-checklist.md
+├── next-steps.md
+├── implementation-notes.md
+
+ai-context/
+├── project-context.md
+├── current-state.md

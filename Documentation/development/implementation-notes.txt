@@ -1,0 +1,243 @@
+# TodoApp — Implementation Notes
+
+## Overview
+
+This document contains important technical notes and design decisions made during development.
+
+These notes explain **why certain systems were implemented in specific ways** and highlight important details developers should be aware of when working on the project.
+
+This document should be updated whenever a new architectural decision or implementation rule is introduced.
+
+---
+
+# Home Screen Data Refresh
+
+The Home screen reloads tasks every time it becomes visible.
+
+This behavior is implemented using **useFocusEffect** instead of useEffect.
+
+Reason:
+
+If useEffect were used, the Home screen would only load tasks once when the component mounts.
+
+When a user creates a task in the Add Task screen and returns to Home, the new task would not appear until the app refreshes.
+
+Using useFocusEffect ensures:
+
+* Tasks reload whenever the Home screen gains focus
+* Newly added tasks appear immediately
+* Updated tasks appear without restarting the app
+
+---
+
+# Task Storage Strategy
+
+Tasks are stored locally using **AsyncStorage**.
+
+Reasons for using AsyncStorage:
+
+* No internet connection required
+* Simple implementation
+* Good performance for small datasets
+* Suitable for early development stages
+
+In future phases, tasks will be synchronized with **Firebase** for cloud storage and multi-device support.
+
+---
+
+# Recurring Task Handling
+
+Recurring tasks are handled dynamically instead of generating multiple future tasks.
+
+Implementation approach:
+
+Only the **current occurrence** of a recurring task appears on the Home screen.
+
+Example:
+
+If a task repeats weekly on Monday:
+
+* Monday → task appears
+* Tuesday → task disappears
+* Next Monday → task appears again
+
+This logic prevents the task list from being filled with future duplicates.
+
+The function responsible for this filtering is:
+
+getActiveTasks()
+
+---
+
+# Completed Tasks Display
+
+Completed tasks are separated from active tasks.
+
+Display behavior:
+
+Active tasks appear at the top of the list.
+
+Completed tasks appear in a separate section at the bottom.
+
+Completed tasks are also:
+
+* collapsed by default
+* visually faded
+* displayed with strikethrough text
+
+This approach keeps the main task list clean and focused on pending work.
+
+---
+
+# Manual Sorting System
+
+Manual sorting allows users to rearrange tasks using drag-and-drop gestures.
+
+Implementation approach:
+
+Each task contains a numeric property called:
+
+sortOrder
+
+When tasks are reordered:
+
+1. Tasks are rearranged visually
+2. Each task receives a new sortOrder value
+3. The updated order is saved to AsyncStorage
+
+The function responsible for saving this order is:
+
+updateSortOrder()
+
+This ensures the custom order persists even after restarting the application.
+
+---
+
+# Category System Design
+
+Categories are predefined and stored in:
+
+constants/Categories.ts
+
+Each category contains:
+
+* name
+* emoji
+* color
+
+Users can also create **custom categories**.
+
+Custom categories are stored locally and do not sync across devices.
+
+To avoid confusion, the app displays a warning message the first time a custom category is created.
+
+---
+
+# Search Behavior
+
+Search functionality filters tasks based on several fields.
+
+Search includes:
+
+* task title
+* category
+* tags
+* notes
+
+Search is **case-insensitive** and supports partial matches.
+
+Example:
+
+Searching for:
+
+cod
+
+Will match:
+
+coding
+code review
+learn coding
+
+This approach improves usability and allows flexible task discovery.
+
+---
+
+# Animation Usage Philosophy
+
+Animations are used sparingly and only during meaningful events.
+
+Current animation events include:
+
+* Splash screen intro
+* Sakura background on Home screen
+* Task completion sparkle
+* Confetti when all tasks are completed
+
+Animations should never interfere with task readability or usability.
+
+---
+
+# Theme System Implementation
+
+The theme system uses **React Context** to share theme colors across the application.
+
+Advantages:
+
+* No prop drilling
+* Global access to theme settings
+* Easy theme switching
+
+Theme preference is stored using AsyncStorage so that the selected theme persists between sessions.
+
+---
+
+# Task Creation Workflow
+
+The process for creating a task follows this flow:
+
+User opens Add Task screen
+User fills task fields
+User presses Save
+
+Then:
+
+1. Inputs are validated
+2. Data is converted into a TaskInput object
+3. addTask() function is called
+4. Task is saved to AsyncStorage
+5. App navigates back to Home screen
+6. Home screen reloads tasks automatically
+
+This ensures the new task appears immediately.
+
+---
+
+# Development Philosophy
+
+The project follows several guiding principles.
+
+Clarity
+Code should be easy to read and understand.
+
+Separation of Concerns
+UI, business logic, and storage are separated into different layers.
+
+Scalability
+The structure should support future features without major refactoring.
+
+Maintainability
+New developers or AI tools should be able to understand the project quickly.
+
+---
+
+# Future Notes
+
+As the project evolves, additional notes will be added regarding:
+
+Firebase integration
+Notification scheduling logic
+Badge and streak systems
+Performance optimizations
+UI improvements
+
+These notes will help maintain long-term consistency in development decisions.

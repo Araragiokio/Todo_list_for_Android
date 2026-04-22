@@ -1,0 +1,285 @@
+# TodoApp - Navigation System
+
+## Overview
+
+TodoApp uses **Expo Router** for navigation. Expo Router is a file-based routing system built on top of React Navigation.
+
+With file-based routing, every file inside the `app/` directory automatically becomes a screen that can be navigated to.
+
+This approach keeps navigation scalable while allowing the app structure to stay aligned with real screen files.
+
+---
+
+# Navigation Architecture
+
+The application uses **Bottom Tab Navigation** as the primary navigation system.
+
+Final tab order:
+
+Home | Add Task | Reminders | Analytics | Profile
+
+The tab bar is persistent across the main experience and stays visible at the bottom of the application.
+
+The previous **Settings** tab has been removed from bottom navigation to reduce clutter and keep the primary navigation focused on task flow and performance tracking.
+
+Settings is now accessed from a **top-right icon on the Profile screen**.
+
+---
+
+# Navigation File Structure
+
+Navigation is controlled by files inside the `app/` directory.
+
+```text
+app/
+|-- _layout.tsx
+|
+`-- (tabs)/
+    |-- _layout.tsx
+    |-- index.tsx
+    |-- addtask.tsx
+    |-- reminders.tsx
+    |-- analytics.tsx
+    |-- profile.tsx
+    `-- settings.tsx
+```
+
+`settings.tsx` remains part of the route tree, but it is no longer a bottom tab destination.
+
+---
+
+# Root Layout
+
+File:
+
+app/_layout.tsx
+
+Responsibilities:
+
+* Wraps the entire application with global providers
+* Controls splash screen behavior
+* Provides app-wide theme context
+* Initializes the navigation system
+
+The root layout ensures all screens share the same global configuration.
+
+---
+
+# Tab Navigator
+
+File:
+
+app/(tabs)/_layout.tsx
+
+Responsibilities:
+
+* Defines the bottom tab navigation
+* Configures icons for each tab
+* Applies theme colors to the tab bar
+* Controls tab appearance and behavior
+
+The tab navigator defines the five main product areas of the application.
+
+---
+
+# Screen Responsibilities
+
+## Home
+
+File:
+
+app/(tabs)/index.tsx
+
+Purpose:
+
+Acts as the task dashboard and main landing experience.
+
+Responsibilities:
+
+* Displays tasks
+* Displays the main dashboard
+* Shows progress and overview information
+* Supports search, filtering, and task discovery
+
+---
+
+## Add Task
+
+File:
+
+app/(tabs)/addtask.tsx
+
+Purpose:
+
+Handles creation and management of new tasks.
+
+Responsibilities:
+
+* Create new tasks
+* Capture task details such as title, category, tags, and notes
+* Configure due dates, reminders, subtasks, and recurrence
+* Return the user to the main flow after saving
+
+---
+
+## Reminders
+
+File:
+
+app/(tabs)/reminders.tsx
+
+Purpose:
+
+Surfaces time-sensitive work that needs attention.
+
+Responsibilities:
+
+* Shows scheduled tasks
+* Shows overdue tasks
+* Highlights reminder-related status
+* Supports reminder-centric task review
+
+---
+
+## Analytics
+
+File:
+
+app/(tabs)/analytics.tsx
+
+Purpose:
+
+Displays user productivity insights and data visualization.
+
+Responsibilities:
+
+* Show category distribution with a pie chart
+* Show weekly performance with a bar chart
+* Show consistency tracking with a heatmap
+* Show smart insights through text-based feedback
+
+This tab is dedicated to understanding productivity trends rather than managing identity or account settings.
+
+---
+
+## Profile
+
+File:
+
+app/(tabs)/profile.tsx
+
+Purpose:
+
+Displays user identity and personal account information.
+
+Responsibilities:
+
+* Show profile info such as name and avatar
+* Show streak and total tasks
+* Reserve space for achievements and badges as a future feature
+* Provide settings access through a top-right icon
+
+This tab is intentionally focused on the user as a person rather than on deep productivity analytics.
+
+---
+
+# Settings Access
+
+File:
+
+app/(tabs)/settings.tsx
+
+Purpose:
+
+Holds configurable application preferences outside of the primary tab flow.
+
+Access pattern:
+
+Profile screen top-right icon -> Settings screen
+
+This keeps the bottom navigation minimal while still making settings easy to reach when needed.
+
+---
+
+# Navigation Behavior
+
+Navigation between screens is handled through Expo Router.
+
+Example navigation action:
+
+```ts
+router.push('/(tabs)/addtask');
+```
+
+This command opens the **Add Task** screen.
+
+Settings is typically opened from the Profile screen using a dedicated icon action rather than a bottom tab.
+
+---
+
+# Floating Action Button Navigation
+
+The Home screen contains a **floating action button (+)** used to quickly add a new task.
+
+Expected behavior:
+
+Press "+" button
+-> Navigate to Add Task tab
+-> User creates task
+-> User returns to Home screen
+
+---
+
+# Tab Icons
+
+Each tab uses an icon from the **Ionicons** icon set.
+
+Example mapping:
+
+Home -> home
+Add Task -> add-circle
+Reminders -> notifications
+Analytics -> stats-chart
+Profile -> person
+
+The Settings screen should use a secondary action icon such as `settings` within the Profile header, not in the bottom tab bar.
+
+---
+
+# Navigation Design Goals
+
+The navigation system is designed to achieve the following:
+
+Simplicity
+Only the most important product areas live in the bottom tab bar.
+
+Clarity
+Each tab has a focused responsibility and avoids feature overlap.
+
+Scalability
+Analytics can expand independently without overloading Profile.
+
+Consistency
+The tab bar remains stable while secondary configuration lives behind contextual entry points.
+
+---
+
+# Developer Notes
+
+* Keep bottom navigation clean and minimal
+* Do not overload a single screen with mixed responsibilities
+* Use proper safe area handling instead of hardcoded spacing fixes
+* Avoid layout hacks such as `marginTop` used purely to compensate for headers or device insets
+
+---
+
+# Future Navigation Expansion
+
+As the application grows, the navigation system may include additional elements such as:
+
+* Stack navigation for task editing screens
+* Modal screens for quick actions
+* Authentication flow for user accounts
+* Deep linking support
+
+These additions should extend the current structure without changing the responsibility boundaries between Home, Analytics, and Profile.

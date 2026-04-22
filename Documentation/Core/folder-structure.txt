@@ -1,0 +1,230 @@
+# TodoApp - Folder Structure
+
+## Overview
+
+TodoApp follows a modular folder structure to keep the codebase organized and maintainable.
+
+The current project uses **Expo Router**, so files inside the `app/` directory become routes automatically. For long-term scalability, the documentation also defines a **conceptual `src/` structure** that keeps screen responsibilities and shared logic easy to understand.
+
+---
+
+# Current Project Structure
+
+```text
+TodoApp/
+|-- app/                  -> Application routes and screens
+|-- assets/               -> Images, icons, and animations
+|-- components/           -> Reusable UI components
+|-- constants/            -> Static configuration values
+|-- context/              -> Global state providers
+|-- hooks/                -> Custom React hooks
+|-- services/             -> Business logic layer
+|-- storage/              -> Local data persistence
+|-- types/                -> TypeScript interfaces and types
+|-- utils/                -> Helper functions
+|-- Documentation/        -> Project documentation
+|
+|-- app.json              -> Expo configuration
+|-- package.json          -> Project dependencies
+|-- tsconfig.json         -> TypeScript configuration
+`-- README.md             -> Project introduction
+```
+
+---
+
+# Current Route Structure
+
+```text
+app/
+|-- _layout.tsx           -> Root layout and global providers
+|-- splash.tsx            -> Splash animation screen
+|-- modal.tsx             -> Modal or temporary screen entry
+|
+`-- (tabs)/
+    |-- _layout.tsx       -> Bottom tab navigator
+    |-- index.tsx         -> Home screen
+    |-- addtask.tsx       -> Add Task screen
+    |-- reminders.tsx     -> Reminders screen
+    |-- analytics.tsx     -> Analytics screen
+    |-- profile.tsx       -> Profile screen
+    `-- settings.tsx      -> Settings screen opened from Profile
+```
+
+### Purpose
+
+Handles navigation and screen layout for the application.
+
+Bottom tab order:
+
+Home | Add Task | Reminders | Analytics | Profile
+
+Settings is intentionally kept outside the bottom tab flow and is accessed from the Profile header.
+
+---
+
+# Scalable Architecture Direction
+
+To keep feature ownership clear as the app grows, documentation should align around the following conceptual structure:
+
+```text
+src/
+  screens/
+    HomeScreen
+    AddTaskScreen
+    RemindersScreen
+    AnalyticsScreen
+    ProfileScreen
+  navigation/
+  components/
+  utils/
+```
+
+This does not replace Expo Router. It documents the intended separation of feature responsibilities and shared modules as the codebase expands.
+
+---
+
+# Screen Responsibility Map
+
+HomeScreen
+Displays tasks and the main dashboard.
+
+AddTaskScreen
+Creates and manages new tasks.
+
+RemindersScreen
+Shows scheduled and overdue tasks.
+
+AnalyticsScreen
+Displays productivity insights and chart-based summaries.
+
+ProfileScreen
+Displays user identity, personal metrics, and a top-right entry point to Settings.
+
+---
+
+# components/
+
+Reusable UI components shared across screens.
+
+Examples:
+
+```text
+components/
+|-- TaskCard.tsx
+|-- CategoryChip.tsx
+|-- ProgressBar.tsx
+|-- SearchBar.tsx
+|-- SortMenu.tsx
+|-- TagChip.tsx
+|-- EnergyBadge.tsx
+|-- SubtaskItem.tsx
+`-- EmptyState.tsx
+```
+
+### Purpose
+
+Keeps UI elements reusable and prevents code duplication.
+
+---
+
+# services/
+
+The business logic layer of the application.
+
+Examples:
+
+```text
+services/
+|-- TaskService.ts
+|-- ReminderService.ts
+`-- AnalyticsService.ts
+```
+
+### Purpose
+
+Applies rules and coordinates interactions between UI and storage.
+
+Analytics-specific processing should live here rather than inside Profile or chart components.
+
+---
+
+# storage/
+
+Handles local data persistence.
+
+Examples:
+
+```text
+storage/
+`-- TaskStorage.ts
+```
+
+### Purpose
+
+Responsible for saving, loading, updating, and deleting task data.
+
+---
+
+# utils/
+
+Helper functions used throughout the application.
+
+Examples:
+
+```text
+utils/
+|-- dateUtils.ts
+|-- sortUtils.ts
+`-- analyticsUtils.ts
+```
+
+### Purpose
+
+Provides reusable helpers for formatting, grouping, sorting, and analytics calculations.
+
+---
+
+# Documentation Structure
+
+```text
+Documentation/
+|-- Core/
+|   |-- project-overview.txt
+|   |-- architecture.txt
+|   |-- folder-structure.txt
+|   `-- navigation.txt
+|
+|-- development/
+|   |-- phase-progress.txt
+|   `-- phase3-checklist.txt
+|
+`-- Ai-context/
+    |-- project-context.txt
+    `-- current-state.txt
+```
+
+### Purpose
+
+Stores documentation that explains how the project works and what direction it is moving toward.
+
+---
+
+# Developer Notes
+
+* Avoid hardcoded layout hacks such as using `marginTop` for spacing that should come from safe area or layout structure
+* Use proper safe area handling
+* Keep navigation clean and minimal
+* Do not overload a single screen with mixed responsibilities
+
+---
+
+# Design Philosophy
+
+The folder structure follows these principles:
+
+* Clear separation of responsibilities
+* Logical grouping of related files
+* Scalability for future features
+* Easy navigation for developers and AI assistants
+
+This structure supports the split between identity-focused Profile features and performance-focused Analytics features.

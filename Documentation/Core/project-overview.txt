@@ -1,0 +1,217 @@
+# TodoApp — Project Overview
+
+## Project Information
+
+**Project Name:** TodoApp
+**Developer:** Aditya Gupta (alias: Araragi Okio)
+**Year:** 2026
+**Platform:** Android (via Expo Go during development)
+**Framework:** React Native + Expo
+**Language:** TypeScript
+
+---
+
+# Vision
+
+TodoApp is a **gamified, anime-inspired productivity application** designed to make daily task management feel engaging, rewarding, and personal.
+
+Instead of being just a simple checklist, the app aims to function as a **daily companion** that encourages productivity through visual feedback, progress tracking, and satisfying interactions.
+
+The app blends:
+
+• practical task management
+• clean mobile UX
+• light gamification
+• subtle anime-inspired aesthetics
+
+to create a productivity experience that feels **alive rather than mechanical**.
+
+---
+
+# Core Goals
+
+The primary goals of TodoApp are:
+
+• Help users organize daily tasks clearly
+• Encourage productivity through progress tracking
+• Make task completion visually satisfying
+• Provide flexible task organization through categories, tags, and energy levels
+• Keep the interface simple while supporting advanced task features
+
+---
+
+# Core Features
+
+The application is designed around a powerful task system with the following capabilities:
+
+### Task Management
+
+Users can create, edit, complete, and delete tasks.
+
+Each task supports:
+
+• title
+• category
+• tags
+• priority level
+• energy level
+• due date
+• reminders
+• notes
+• subtasks
+• recurring rules
+
+---
+
+### Categories
+
+Tasks can be organized using predefined categories such as:
+
+• Work / Career
+• Education
+• Health & Fitness
+• Self-Improvement
+• Creativity
+• Personal / Life Admin
+• Finance
+• Social
+• Leisure
+• Planning
+
+Users can also create **custom categories**.
+
+---
+
+### Tags
+
+Tags allow flexible grouping and searching of tasks beyond categories.
+
+Example:
+
+```
+#coding
+#deepwork
+#study
+```
+
+Tags make searching and filtering tasks easier.
+
+---
+
+### Energy Levels
+
+Tasks can optionally be labeled with an **energy requirement** to help users choose tasks based on mental state.
+
+Energy types include:
+
+• Deep Work
+• Focus
+• Quick Task
+• Low Energy
+
+This allows users to work productively even during low-energy periods.
+
+---
+
+### Progress Tracking
+
+The Home screen displays a **daily progress bar** showing completed vs total tasks.
+
+When all tasks are completed:
+
+• a celebration animation plays
+• the user receives visual feedback
+
+This helps reinforce a sense of accomplishment.
+
+---
+
+### Search and Filtering
+
+Tasks can be searched and filtered using:
+
+• text search
+• category filters
+• tags
+• sorting options
+
+Search works across:
+
+• task titles
+• tags
+• categories
+• notes
+
+---
+
+### Sorting Options
+
+Tasks can be sorted by multiple criteria:
+
+• Due date
+• Priority
+• Energy level
+• Created time
+• Manual drag ordering
+
+This gives users flexibility in how tasks are organized.
+
+---
+
+# Design Philosophy
+
+TodoApp follows a design philosophy built around three principles:
+
+### 1. Simplicity
+
+The interface should remain clean and easy to understand.
+
+### 2. Feedback
+
+User actions should always produce visual feedback such as animations or progress changes.
+
+### 3. Personal Feeling
+
+The application should feel like a companion rather than a cold productivity tool.
+
+---
+
+# Visual Identity
+
+The app incorporates subtle anime-inspired visuals including:
+
+• sakura background animation on the Home screen
+• sparkle animation when tasks are completed
+• confetti celebration when all tasks are finished
+
+Animations are used **sparingly and purposefully** to enhance the experience without becoming distracting.
+
+---
+
+# Current Development Status
+
+The application is currently in **Phase 3 — Core Features**.
+
+Completed systems include:
+
+• project setup
+• navigation structure
+• theme system
+• splash screen animation
+• task data model
+• task storage system
+• Home screen with filtering, sorting, and search
+
+The next major feature to implement is the **Add Task screen**.
+
+---
+
+# Repository
+
+GitHub Repository:
+
+https://github.com/Araragiokio/Todo_list_for_Android
+
+---
+
+TodoApp is an ongoing project focused on building a **powerful yet emotionally engaging productivity tool**.

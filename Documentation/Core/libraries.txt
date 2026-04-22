@@ -1,0 +1,334 @@
+# TodoApp — Libraries Used
+
+## Overview
+
+TodoApp is built using **React Native with Expo** and relies on several libraries to handle navigation, animations, storage, notifications, and other core functionality.
+
+These libraries provide ready-made solutions for common mobile app features and allow the application to be developed efficiently without reinventing standard components.
+
+All libraries used in the project are compatible with the **Expo environment**.
+
+---
+
+# Core Framework
+
+## React Native
+
+Purpose:
+Provides the foundation for building the mobile application using JavaScript and native components.
+
+Responsibilities:
+
+* Rendering UI components
+* Managing component lifecycle
+* Handling user interaction
+* Running the application logic
+
+---
+
+## Expo
+
+Purpose:
+Expo simplifies React Native development by providing tools, APIs, and libraries that work without requiring native configuration.
+
+Responsibilities:
+
+* Project setup and development environment
+* Access to device APIs
+* Running the app through Expo Go
+* Simplified package management
+
+---
+
+# Navigation
+
+## @react-navigation/native
+
+Purpose:
+Provides the core navigation system used for moving between screens.
+
+Responsibilities:
+
+* Managing navigation state
+* Handling screen transitions
+* Supporting navigation actions
+
+---
+
+## @react-navigation/bottom-tabs
+
+Purpose:
+Creates the bottom tab navigation used as the main navigation structure.
+
+Responsibilities:
+
+* Rendering the tab bar
+* Managing tab switching
+* Displaying icons and labels for each tab
+
+---
+
+## react-native-screens
+
+Purpose:
+Improves navigation performance by optimizing screen rendering.
+
+Responsibilities:
+
+* Efficient screen transitions
+* Reduced memory usage
+
+---
+
+## react-native-safe-area-context
+
+Purpose:
+Ensures UI elements respect safe areas on devices with notches, rounded corners, or system UI overlays.
+
+Responsibilities:
+
+* Managing safe layout margins
+* Preventing UI overlap with device elements
+
+---
+
+# Animations
+
+## lottie-react-native
+
+Purpose:
+Used to display high-quality animations created in Lottie format.
+
+Responsibilities:
+
+* Splash screen animations
+* Task completion sparkle animation
+* Confetti celebration animation
+* Sakura background animation
+
+Animations are stored in:
+
+assets/animations/
+
+---
+
+## react-native-reanimated
+
+Purpose:
+Provides advanced animation capabilities for smooth UI transitions.
+
+Responsibilities:
+
+* Performance-optimized animations
+* Gesture-based animation support
+
+---
+
+# Notifications
+
+## expo-notifications
+
+Purpose:
+Handles scheduling and displaying notifications.
+
+Responsibilities:
+
+* Task reminders
+* Deadline alerts
+* Future push notification support
+
+This system will be expanded during later development phases.
+
+---
+
+# Storage
+
+## @react-native-async-storage/async-storage
+
+Purpose:
+Provides persistent local storage for the application.
+
+Responsibilities:
+
+* Saving tasks
+* Loading tasks
+* Updating task data
+* Storing theme preferences
+* Storing custom categories
+
+AsyncStorage ensures that data remains available even after the app is closed.
+
+---
+
+# Audio
+
+## expo-av
+
+Purpose:
+Provides support for playing sound effects within the app.
+
+Responsibilities:
+
+* Task completion sound
+* Notification sound
+* Feedback audio
+
+Audio feedback enhances the user experience by reinforcing actions.
+
+---
+
+# Media Handling
+
+## expo-image-picker
+
+Purpose:
+Allows the user to select images from the device gallery or camera.
+
+Responsibilities:
+
+* Profile picture selection
+* Future media attachments
+
+---
+
+## expo-image
+
+Purpose:
+Provides improved image loading performance and caching.
+
+Responsibilities:
+
+* Efficient rendering of images
+* Optimized image loading
+
+---
+
+# Fonts
+
+## expo-font
+
+Purpose:
+Allows custom fonts to be loaded and used within the application.
+
+Responsibilities:
+
+* Loading font files
+* Making fonts available across the app
+
+---
+
+## @expo-google-fonts/poppins
+
+Purpose:
+Provides the Poppins font family.
+
+Usage:
+
+Headings
+UI emphasis
+Important labels
+
+---
+
+## @expo-google-fonts/inter
+
+Purpose:
+Provides the Inter font family.
+
+Usage:
+
+Body text
+Task titles
+Descriptions
+
+---
+
+# Charts
+
+## victory-native
+
+Purpose:
+Used for rendering charts and graphs within the application.
+
+Responsibilities:
+
+* Task completion statistics
+* Category analysis charts
+* Productivity insights
+
+---
+
+## react-native-svg
+
+Purpose:
+Provides SVG rendering capabilities required by chart libraries.
+
+Responsibilities:
+
+* Rendering scalable vector graphics
+* Supporting chart visualization
+
+---
+
+# Haptic Feedback
+
+## expo-haptics
+
+Purpose:
+Provides vibration feedback when users interact with UI elements.
+
+Responsibilities:
+
+* Task completion feedback
+* Button interaction feedback
+* Enhanced user interaction feel
+
+---
+
+# Drag and Drop
+
+## react-native-draggable-flatlist
+
+Purpose:
+Enables drag-and-drop reordering of tasks.
+
+Responsibilities:
+
+* Manual task sorting
+* Rearranging tasks on the Home screen
+* Updating stored task order
+
+---
+
+# Backend Integration (Planned)
+
+## firebase
+
+Purpose:
+Provides backend services that will be integrated in later development phases.
+
+Planned responsibilities:
+
+* User authentication
+* Cloud data storage
+* Cross-device synchronization
+* Remote database management
+
+Currently, Firebase is installed but not yet integrated.
+
+---
+
+# Summary
+
+The libraries used in TodoApp enable the following core capabilities:
+
+Navigation between screens
+Smooth animations and visual feedback
+Local data storage
+Notifications and reminders
+Custom fonts and UI styling
+Charts and analytics
+Media handling and profile images
+Drag-and-drop task organization
+
+Together, these libraries provide the technical foundation required to build a modern and responsive mobile productivity application.

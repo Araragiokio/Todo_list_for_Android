@@ -1,0 +1,203 @@
+# TodoApp - Project Context
+
+## Overview
+
+This document provides high-level context about the TodoApp project.
+
+Its purpose is to quickly help developers, contributors, and AI assistants understand:
+
+* what the project is
+* why it exists
+* how it is designed
+* what direction the product is currently taking
+
+This file acts as a quick orientation guide before diving into deeper technical documentation.
+
+---
+
+# What TodoApp Is
+
+TodoApp is a mobile productivity application designed to help users organize tasks, track progress, and maintain daily productivity.
+
+Unlike a basic todo list, TodoApp is intended to balance practical task management with a more engaging and motivating user experience.
+
+The application combines:
+
+Task management
+Visual feedback
+Light gamification
+Clean mobile UX
+
+to create a productivity tool that feels supportive rather than mechanical.
+
+---
+
+# Product Direction
+
+The app is organized around focused product areas rather than one overloaded dashboard.
+
+Current main navigation:
+
+Home | Add Task | Reminders | Analytics | Profile
+
+Settings is not a bottom tab.
+
+Settings is accessed through a top-right icon on the Profile screen.
+
+This navigation model keeps high-frequency actions visible while moving secondary configuration out of the main tab bar.
+
+---
+
+# Screen Ownership
+
+Home
+Displays tasks and the main dashboard.
+
+Add Task
+Creates and manages new tasks.
+
+Reminders
+Shows scheduled and overdue tasks.
+
+Analytics
+Displays productivity insights and data visualization.
+
+Profile
+Displays user identity, personal data, streaks, totals, and settings access.
+
+---
+
+# Architecture Philosophy
+
+TodoApp follows a clear separation of concerns:
+
+Profile = Identity
+Who the user is.
+
+Analytics = Performance
+How the user is doing.
+
+Analytics features are intentionally not placed inside Profile.
+
+Reason:
+
+* Identity and performance are different domains
+* Each screen should have one primary responsibility
+* Analytics needs room to grow into charts, filters, and insight systems
+* Profile should remain clean and personal
+
+This decision supports better UX clarity and long-term scalability.
+
+---
+
+# Analytics Vision
+
+Analytics is planned as a dedicated product area for understanding user behavior and productivity patterns.
+
+Planned analytics features:
+
+Pie Chart
+Completed tasks grouped by category with Week / Month / Year filters.
+
+Bar Chart
+Tasks completed per day in a weekly view.
+
+Heatmap
+Long-term consistency across days.
+
+Insights
+Text-based feedback generated from user data such as category focus, productivity patterns, and streaks.
+
+---
+
+# Technology Stack
+
+Framework:
+
+React Native + Expo
+
+Language:
+
+TypeScript
+
+Navigation:
+
+Expo Router / React Navigation
+
+Local Storage:
+
+AsyncStorage
+
+Animations:
+
+Lottie
+
+---
+
+# Development State
+
+The project is currently in:
+
+Phase 3 - Analytics UI Skeleton
+
+Roadmap summary:
+
+Phase 1 - Core UI and task system
+Phase 2 - Navigation restructuring
+Phase 3 - Analytics UI skeleton
+Phase 4 - Data processing for charts
+Phase 5 - Smart insights and advanced features
+
+This phased approach keeps development organized while aligning architecture with product priorities.
+
+---
+
+# Folder Direction
+
+For scalable documentation and planning, the project recognizes the following conceptual structure:
+
+```text
+src/
+  screens/
+    HomeScreen
+    AddTaskScreen
+    RemindersScreen
+    AnalyticsScreen
+    ProfileScreen
+  navigation/
+  components/
+  utils/
+```
+
+This describes feature ownership and architecture direction while Expo Router continues to drive route files under `app/`.
+
+---
+
+# Developer Expectations
+
+* Keep navigation clean and minimal
+* Use proper safe area handling
+* Avoid hardcoded layout hacks such as spacing based on `marginTop`
+* Do not overload a single screen with mixed responsibilities
+
+---
+
+# Role Of Documentation
+
+Documentation exists to keep future development consistent.
+
+The documentation system helps:
+
+* Developers understand the architecture
+* AI tools understand the codebase
+* Future development remain consistent
+
+Important documents include:
+
+* Navigation
+* Architecture
+* Folder Structure
+* Phase Progress
+* Current State
+
+Together these documents provide a shared source of truth for product and engineering decisions.

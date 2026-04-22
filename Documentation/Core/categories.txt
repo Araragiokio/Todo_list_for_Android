@@ -1,0 +1,233 @@
+# TodoApp — Categories System
+
+## Overview
+
+Categories are used to organize tasks into meaningful groups based on the type of activity they represent.
+
+They provide a simple way for users to filter and manage tasks according to different areas of life such as work, health, or personal activities.
+
+Each category in TodoApp contains:
+
+* Name
+* Emoji icon
+* Color
+
+Categories are defined in:
+
+constants/Categories.ts
+
+---
+
+# Default Categories
+
+TodoApp includes **10 predefined categories** that cover most common productivity areas.
+
+These categories are available immediately when the app is installed.
+
+Default categories include:
+
+Work / Career
+Education
+Health & Fitness
+Self-Improvement
+Creativity
+Personal / Life Admin
+Finance
+Social
+Leisure
+Planning
+
+These categories appear in the **Home screen filter chips** and in the **Add Task category selector**.
+
+---
+
+# Category Data Structure
+
+Each category is defined as an object with three properties.
+
+Example structure:
+
+```id="category_structure"
+export const DEFAULT_CATEGORIES = [
+  { name: 'Work / Career', emoji: '💼', color: '#4A90E2' },
+  { name: 'Education', emoji: '📚', color: '#7B68EE' },
+  { name: 'Health & Fitness', emoji: '💪', color: '#FF6B6B' },
+  { name: 'Self-Improvement', emoji: '🌱', color: '#9370DB' },
+  { name: 'Creativity', emoji: '🎨', color: '#FF69B4' },
+  { name: 'Personal / Life Admin', emoji: '🏠', color: '#DEB887' },
+  { name: 'Finance', emoji: '💰', color: '#FFD700' },
+  { name: 'Social', emoji: '👥', color: '#FF8C00' },
+  { name: 'Leisure', emoji: '🎮', color: '#00CED1' },
+  { name: 'Planning', emoji: '📝', color: '#CD853F' },
+];
+```
+
+Each field has a specific purpose.
+
+---
+
+# Category Fields
+
+## name
+
+Type: string
+
+Represents the display name of the category.
+
+Example:
+
+Work / Career
+
+This value is stored in the task object when a task is assigned to a category.
+
+---
+
+## emoji
+
+Type: string
+
+An emoji used to visually represent the category.
+
+Example:
+
+💼 for Work
+📚 for Education
+💪 for Fitness
+
+The emoji is displayed in:
+
+* Category filter chips
+* Task cards
+* Category picker
+
+---
+
+## color
+
+Type: string (hex color code)
+
+Represents the primary color associated with the category.
+
+Example:
+
+#4A90E2
+
+This color may be used in UI elements such as category indicators or highlights.
+
+---
+
+# Category Usage in the Application
+
+Categories appear in several parts of the application.
+
+### Home Screen Filters
+
+At the top of the Home screen, categories are displayed as **horizontal filter chips**.
+
+Selecting a category filters the task list to show only tasks belonging to that category.
+
+---
+
+### Task Cards
+
+Each task card displays the category information.
+
+Example display:
+
+📚 Education · Due Mar 20
+
+This helps users quickly understand the context of each task.
+
+---
+
+### Add Task Screen
+
+When creating a task, users select a category from the category picker.
+
+The picker shows:
+
+Emoji
+Category name
+Selected state indicator
+
+---
+
+# Custom Categories
+
+Users can create their own categories if the default set does not fit their needs.
+
+Custom categories allow users to personalize the app according to their workflow.
+
+Example custom categories:
+
+Side Projects
+Reading
+Learning Japanese
+
+Custom categories contain the same properties as default categories:
+
+Name
+Emoji
+Color
+
+---
+
+# Custom Category Storage
+
+Custom categories are stored locally using AsyncStorage.
+
+This means:
+
+* Custom categories exist only on the device where they were created
+* They are not synchronized across devices
+
+The application displays a warning the first time a user creates a custom category to inform them of this behavior.
+
+---
+
+# Category Filtering Logic
+
+When a category filter is selected on the Home screen, tasks are filtered using the following rule.
+
+Example logic:
+
+```
+If selected category = "All"
+→ show all tasks
+
+If selected category = "Education"
+→ show tasks where task.category === "Education"
+```
+
+Category filtering works together with search and sorting systems.
+
+---
+
+# Design Goals of the Category System
+
+The category system is designed to achieve the following goals.
+
+Clarity
+Tasks can be easily grouped by activity type.
+
+Visual recognition
+Emoji icons allow users to recognize categories quickly.
+
+Flexibility
+Users can create custom categories when needed.
+
+Simplicity
+Categories provide structure without making task creation complicated.
+
+---
+
+# Future Improvements
+
+Possible future enhancements to the category system include:
+
+Custom category editing
+Custom category icons
+Category-based statistics
+Category color customization
+
+These features may be introduced in later development phases.

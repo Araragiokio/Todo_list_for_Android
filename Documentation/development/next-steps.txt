@@ -1,0 +1,163 @@
+# TodoApp — Phase 3 Checklist
+
+## Overview
+
+Phase 3 focuses on implementing the **core task management features** of the application.
+
+This phase transforms the project from a basic UI structure into a fully functional productivity tool where users can create, manage, and interact with tasks.
+
+Phase 3 is divided into three main steps:
+
+Step 7 — Home Screen
+Step 8 — Add Task Screen
+Step 9 — Task Actions
+
+Step 7 has already been completed.
+This checklist tracks the remaining work for Phase 3.
+
+---
+
+# Step 7 — Home Screen
+
+Status: Completed
+
+The Home screen acts as the central hub of the application.
+
+Completed features include:
+
+Search bar functionality
+Category filter chips
+Task sorting system
+Task cards with priority indicators
+Subtask progress display
+Energy level indicators
+Completed tasks section
+Progress bar showing task completion
+Time-based greeting message
+Theme toggle button
+Sakura background animation
+
+Outcome:
+
+Users can now view, search, filter, and sort their tasks on the Home screen.
+
+---
+
+# Step 8 — Add Task Screen
+
+Status: In Progress
+
+This step focuses on building the interface for creating new tasks.
+
+Tasks to implement:
+
+Screen layout using ScrollView
+
+Task Title Input
+Required field for entering the main task description.
+
+Category Picker
+Allows the user to select one of the predefined or custom categories.
+
+Tags Input System
+Users can add tags which will be displayed as chips.
+
+Energy Level Selector
+Options include Deep Work, Focus, Quick Task, and Low Energy.
+
+Priority Selector
+Options include High, Medium, and Low priority.
+
+Due Date Picker
+Allows users to select a deadline for the task.
+
+Auto Reminder Toggle
+Automatically schedules reminders when a due date is set.
+
+Notes Field
+Optional multiline input for additional task details.
+
+Subtasks Builder
+Allows users to add multiple subtasks to break larger tasks into smaller steps.
+
+Recurring Task Configuration
+Allows tasks to repeat daily, weekly, monthly, or yearly.
+
+Save Task Functionality
+Stores the task using the task storage system.
+
+Navigation After Save
+User is returned to the Home screen after saving a task.
+
+Form Reset After Save
+All fields reset to default values after a task is created.
+
+Outcome after completion:
+
+Users will be able to create detailed tasks with multiple attributes.
+
+---
+
+# Step 9 — Task Actions
+
+Status: Pending
+
+This step focuses on user interactions with tasks.
+
+Tasks to implement:
+
+Task Completion Animation
+A sparkle animation appears when a task is marked as complete.
+
+All Tasks Completed Animation
+A confetti animation appears when the user completes all tasks.
+
+Swipe-to-Delete Gesture
+Users can swipe a task card to delete it.
+
+Edit Task Screen
+Allows users to modify existing tasks.
+
+Subtask Completion
+Users can mark individual subtasks as complete.
+
+Automatic Parent Task Completion
+If all subtasks are completed, the parent task automatically completes.
+
+Manual Drag-and-Drop Sorting
+Users can reorder tasks manually using drag gestures.
+
+Persist Manual Order
+The new order is saved using the `updateSortOrder()` function.
+
+Recurring Task Overdue Logic
+Recurring tasks that were missed display an overdue indicator the next day.
+
+Outcome after completion:
+
+Users will have full control over interacting with tasks.
+
+---
+
+# Phase 3 Completion Goal
+
+Phase 3 will be complete once:
+
+Users can create tasks
+Users can view tasks
+Users can edit tasks
+Users can delete tasks
+Users can mark tasks and subtasks as completed
+Tasks can be sorted and organized
+
+At this point the application will have a **fully functional local task management system**.
+
+---
+
+# Next Phase After Completion
+
+Once Phase 3 is complete, development will move to:
+
+Phase 4 — Notifications and Reminders
+
+This phase will introduce scheduled notifications and deadline reminders.

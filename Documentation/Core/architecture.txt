@@ -1,0 +1,331 @@
+# TodoApp - Architecture
+
+## Overview
+
+TodoApp follows a **layered architecture** with clear separation of responsibilities.
+
+This structure keeps the codebase maintainable, scalable, and easier to evolve as features such as analytics, reminders, and profile systems grow independently.
+
+The application is divided into four primary layers:
+
+1. UI Layer
+2. Service Layer
+3. Storage Layer
+4. Utility Layer
+
+Each layer has a specific role and communicates in a predictable way.
+
+---
+
+# 1. UI Layer
+
+The UI layer contains everything related to the visual interface of the app.
+
+This includes:
+
+* Screens
+* Components
+* Layout structure
+* Navigation
+* Visual states and feedback
+
+The UI layer should not contain persistence logic or data processing rules.
+
+### Responsibilities
+
+* Rendering task lists and dashboards
+* Handling user input
+* Displaying task and profile information
+* Presenting analytics visualizations
+* Triggering actions like add, edit, complete, delete, and navigate
+
+### Main Folders
+
+app/
+components/
+
+### Main Screen Responsibilities
+
+Home
+Displays tasks and the main dashboard.
+
+Add Task
+Creates and manages new tasks.
+
+Reminders
+Shows scheduled and overdue tasks.
+
+Analytics
+Displays productivity insights and data visualization.
+
+Profile
+Displays user identity, personal information, and access to settings.
+
+---
+
+# 2. Service Layer
+
+The Service Layer contains the **business logic of the application**.
+
+This layer acts as the bridge between UI and data storage.
+
+Instead of allowing screens to manipulate storage directly, feature logic should move through services.
+
+### Responsibilities
+
+* Applying task rules
+* Scheduling reminders
+* Aggregating analytics data
+* Calculating streaks and totals
+* Preparing chart-ready datasets
+* Generating smart insights from user activity
+
+### Main Folders
+
+services/
+
+### Example Service Responsibilities
+
+TaskService
+Handles task creation, updates, completion, and deletion logic.
+
+ReminderService
+Handles scheduling and managing task notifications.
+
+AnalyticsService
+Transforms task history into datasets for charts and insight generation.
+
+ProfileService
+Aggregates identity-adjacent data such as streaks, totals, and user-facing profile metrics.
+
+---
+
+# 3. Storage Layer
+
+The Storage Layer is responsible for **data persistence**.
+
+Currently the app stores data locally using AsyncStorage.
+
+This layer should not contain business decisions.
+
+### Responsibilities
+
+* Saving tasks
+* Retrieving tasks
+* Updating tasks
+* Removing tasks
+* Persisting local preferences
+* Providing raw data for analytics processing
+
+### Main Folders
+
+storage/
+
+### Example Storage File
+
+TaskStorage.ts
+
+### Storage Technology
+
+AsyncStorage
+
+This allows tasks and related local preferences to remain available after the app closes.
+
+---
+
+# 4. Utility Layer
+
+The Utility Layer contains pure helper functions.
+
+These functions perform calculations or formatting and do not manage application state.
+
+### Responsibilities
+
+* Date formatting
+* Sorting algorithms
+* Grouping and aggregation helpers
+* Chart transformation helpers
+* General helper functions
+
+### Main Folder
+
+utils/
+
+### Example Utilities
+
+dateUtils.ts
+Handles date comparisons, formatting, and grouping.
+
+sortUtils.ts
+Contains sorting logic for due date, priority, energy level, and manual ordering.
+
+analyticsUtils.ts
+Supports chart grouping, time filtering, and consistency calculations.
+
+---
+
+# Data Flow
+
+The architecture follows a predictable data flow:
+
+User Interaction
+-> UI Layer
+-> Service Layer
+-> Storage Layer
+-> Data returned upward
+-> UI updates
+
+This separation keeps the UI simple while placing logic in reusable layers.
+
+---
+
+# Navigation Architecture
+
+Navigation is handled using **Expo Router** with a bottom tab structure for the main product areas.
+
+### Primary Tabs
+
+Home
+Add Task
+Reminders
+Analytics
+Profile
+
+### Secondary Route
+
+Settings
+Accessed from the top-right icon on the Profile screen.
+
+Navigation configuration is centered in:
+
+app/(tabs)/_layout.tsx
+
+---
+
+# Separation Of Concerns Philosophy
+
+TodoApp intentionally separates identity and performance into different product areas.
+
+Profile = Identity
+Who the user is.
+
+Analytics = Performance
+How the user is doing.
+
+This split matters because identity screens and performance dashboards evolve differently.
+
+Profile should remain focused on:
+
+* Name
+* Avatar
+* Personal account information
+* Streak summary
+* Total task summary
+* Achievements or badges
+* Settings access
+
+Analytics should remain focused on:
+
+* Category distribution
+* Weekly performance
+* Consistency tracking
+* Smart insights
+* Time-based productivity patterns
+
+Analytics features are **not placed inside Profile** because combining them would overload a single screen with mixed responsibilities.
+
+Keeping them separate improves:
+
+* UX clarity
+* Scalability
+* Component reuse
+* Future maintainability
+
+---
+
+# Analytics System Overview
+
+The analytics system is planned as a dedicated feature area backed by reusable data-processing logic.
+
+### Pie Chart
+
+Based on completed tasks grouped by category.
+
+Supports time filters:
+
+Week / Month / Year
+
+### Bar Chart
+
+Shows the number of tasks completed per day in a weekly view.
+
+### Heatmap
+
+Displays long-term consistency across days to help users understand habit strength over time.
+
+### Smart Insights
+
+Generated from user data such as:
+
+* Category focus
+* Productivity patterns
+* Completion streaks
+* Momentum changes
+
+The UI should remain presentation-focused while services and utilities prepare the chart data and text insights.
+
+---
+
+# State Management
+
+TodoApp primarily uses **React state and context** for state management.
+
+Global concerns such as theme settings should be handled through React Context.
+
+Feature-specific derived data, including analytics summaries, should be computed through dedicated services or hooks instead of being embedded directly into screen components.
+
+---
+
+# Folder Direction For Scalability
+
+For long-term maintainability, feature boundaries should remain clear even if routing continues to live under `app/`.
+
+Conceptual scalable structure:
+
+```text
+src/
+  screens/
+    HomeScreen
+    AddTaskScreen
+    RemindersScreen
+    AnalyticsScreen
+    ProfileScreen
+  navigation/
+  components/
+  utils/
+```
+
+This structure is a design direction for scaling responsibilities, not a requirement to abandon Expo Router file-based routes.
+
+---
+
+# Developer Notes
+
+* Avoid hardcoded layout hacks such as adding `marginTop` only to compensate for headers or status bars
+* Use proper safe area handling
+* Keep navigation clean and minimal
+* Do not overload a single screen with mixed responsibilities
+* Keep analytics logic outside of Profile and outside of low-level UI components
+
+---
+
+# Architectural Goals
+
+The architecture is designed to achieve the following:
+
+Maintainability
+Scalability
+Clear separation of concerns
+Easy onboarding for developers and AI assistants
+
+This structure ensures that TodoApp can grow without turning screens into multi-purpose feature buckets.

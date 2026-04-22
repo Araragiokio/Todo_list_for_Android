@@ -1,0 +1,172 @@
+# TodoApp — Theme System
+
+## Overview
+
+TodoApp supports a **dynamic theme system** that allows the application to switch between light mode and dark mode.
+
+The theme system is implemented using **React Context**, which allows theme values to be accessed anywhere in the application without passing props manually.
+
+All screens and components reference the theme colors from the global theme context.
+
+---
+
+# Theme Modes
+
+The application supports three theme modes.
+
+Light
+Dark
+System
+
+Light and Dark modes apply predefined color palettes.
+
+System mode automatically follows the device's operating system theme.
+
+---
+
+# Theme Context
+
+The theme state is managed using a global context.
+
+File location:
+
+context/ThemeContext.tsx
+
+Responsibilities:
+
+* Store the current theme mode
+* Provide theme colors to the entire application
+* Allow theme switching
+* Persist theme preference locally
+
+This ensures that theme changes immediately update all UI elements.
+
+---
+
+# Theme Persistence
+
+The selected theme is saved using **AsyncStorage**.
+
+When the app launches:
+
+1. The app reads the stored theme preference
+2. If a preference exists, it is applied
+3. If no preference exists, the system theme is used
+
+This allows the theme to remain consistent between app sessions.
+
+---
+
+# Theme Color Palettes
+
+Theme colors are defined in:
+
+constants/Colors.ts
+
+The file contains two main color palettes.
+
+Light theme colors
+Dark theme colors
+
+---
+
+# Light Theme
+
+The light theme uses warm, soft colors inspired by a calm and comfortable interface.
+
+Background: #F5DEB3
+Card: #FAEBD7
+Text: #2C2416
+Subtext: #8B7355
+Accent: #E8950A
+Border: #DEB887
+
+Status colors:
+
+Success: #4CAF50
+Warning: #FF9800
+Danger: #F44336
+
+Tab bar background: #FAEBD7
+
+---
+
+# Dark Theme
+
+The dark theme uses deep colors for comfortable viewing in low-light environments.
+
+Background: #2C2C3A
+Card: #3A3A4A
+Text: #F0EFF4
+Subtext: #9B99AA
+Accent: #6C63FF
+Border: #4A4A5A
+
+Status colors:
+
+Success: #4CAF50
+Warning: #FF9800
+Danger: #F44336
+
+Tab bar background: #2C2C3A
+
+---
+
+# Theme Usage in Components
+
+Components access the theme through the `useTheme` hook.
+
+Example usage:
+
+```id="theme_usage_example"
+const { colors } = useTheme();
+
+<View style={{ backgroundColor: colors.background }}>
+  <Text style={{ color: colors.text }}>Hello</Text>
+</View>
+```
+
+Using the theme context ensures that the UI updates automatically when the theme changes.
+
+---
+
+# Theme Toggle
+
+A temporary theme toggle button exists on the Home screen.
+
+The button allows users to quickly switch between light and dark mode.
+
+The toggle displays:
+
+Sun icon → light mode
+Moon icon → dark mode
+
+In later development phases, this toggle will be moved to the **Settings screen**.
+
+---
+
+# Theme Design Principles
+
+The theme system follows several design principles.
+
+Consistency
+All UI elements use theme colors instead of hardcoded values.
+
+Accessibility
+Text and background colors are chosen to maintain readability.
+
+Flexibility
+New themes or accent colors can be added in the future.
+
+---
+
+# Future Improvements
+
+Planned improvements for the theme system include:
+
+Accent color customization
+Expanded theme options
+Improved theme animations
+User-selectable UI styles
+
+These enhancements will be implemented in later development phases.

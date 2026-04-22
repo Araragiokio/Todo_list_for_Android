@@ -1,0 +1,136 @@
+# TodoApp - Current Project State
+
+## Overview
+
+This document provides a quick snapshot of the current product direction and technical state of TodoApp.
+
+It is intended to help developers and AI assistants stay aligned with the latest navigation, architecture, and roadmap decisions.
+
+---
+
+# Project Status
+
+Project Name: TodoApp
+Developer: Aditya Gupta
+Platform: Android (via Expo Go)
+Framework: React Native + Expo
+Language: TypeScript
+
+Current Phase: Phase 3 - Analytics UI Skeleton
+
+---
+
+# Navigation State
+
+The app uses bottom tab navigation for the main product areas.
+
+Final tab order:
+
+Home | Add Task | Reminders | Analytics | Profile
+
+Settings is no longer a bottom tab.
+
+Settings is accessed through a **top-right icon on the Profile screen**.
+
+This change improves UX clarity and keeps primary navigation focused on high-frequency actions.
+
+---
+
+# Screen Responsibilities
+
+Home
+Displays tasks and the main dashboard.
+
+Add Task
+Creates and manages new tasks.
+
+Reminders
+Shows scheduled and overdue tasks.
+
+Analytics
+Displays productivity insights and planned visualizations including pie chart, bar chart, heatmap, and smart insights.
+
+Profile
+Displays user identity, personal data, streaks, totals, future achievements, and settings access.
+
+---
+
+# Architecture Direction
+
+The app now follows an explicit separation of concerns between identity and performance:
+
+Profile = Identity
+Analytics = Performance
+
+Analytics features should not be placed inside Profile.
+
+Reason:
+
+* Keeps screens focused
+* Improves scalability
+* Prevents Profile from becoming overloaded
+* Makes future analytics expansion easier
+
+---
+
+# Analytics State
+
+The current analytics work is a UI skeleton only.
+
+Planned analytics features:
+
+Pie Chart
+Completed tasks grouped by category with Week / Month / Year filters.
+
+Bar Chart
+Tasks completed per day in a weekly view.
+
+Heatmap
+Long-term consistency across days.
+
+Insights
+Text-based feedback generated from user productivity data.
+
+Real data processing is planned for the next phase.
+
+---
+
+# Core Systems Implemented
+
+The project already has a strong base including:
+
+* Expo Router navigation
+* Theme system
+* Splash screen flow
+* Task data model
+* Local task storage
+* Home screen foundation
+* Reminders screen foundation
+* Profile screen foundation
+
+---
+
+# Roadmap Snapshot
+
+Phase 1 - Core UI and task system
+Phase 2 - Navigation restructuring with Analytics tab
+Phase 3 - Analytics UI skeleton
+Phase 4 - Data processing for charts
+Phase 5 - Smart insights and advanced features
+
+---
+
+# Developer Notes
+
+* Avoid hardcoded layout hacks like `marginTop` for spacing fixes
+* Use proper safe area handling
+* Keep navigation minimal
+* Do not mix identity, settings, and analytics responsibilities into one screen
+
+---
+
+# Summary
+
+TodoApp now has a clearer product structure centered around focused tabs and scalable feature ownership.
+
+The current priority is building the Analytics screen skeleton while preserving clean separation between dashboard, reminders, analytics, and profile concerns.
