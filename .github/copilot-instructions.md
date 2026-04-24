@@ -39,3 +39,9 @@ No test runner is currently configured in `package.json` (no `test` script), so 
 - **Manual ordering is persisted** by writing `sortOrder` through `updateSortOrder`; do not implement transient UI-only ordering for the home active list.
 - **File-based routing is canonical**: create screens under `app/` (or `app/(tabs)/`) and navigate using Expo Router paths (e.g. `router.push('/(tabs)/addtask')`).
 - **Path aliasing is enabled** via `@/*` in `tsconfig.json`; prefer alias imports for app code (`@/context/...`, `@/storage/...`, etc.) and preserve existing filename casing when importing.
+
+## graphify
+
+Before answering architecture or codebase questions, read `graphify-out/GRAPH_REPORT.md` if it exists.
+If `graphify-out/wiki/index.md` exists, navigate it for deep questions.
+Type `/graphify` in Copilot Chat to build or update the knowledge graph.

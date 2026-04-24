@@ -42,3 +42,5 @@ app-example
 /ios
 /android
 assets/animations/client_secret*.json
+
+graphify-out/
