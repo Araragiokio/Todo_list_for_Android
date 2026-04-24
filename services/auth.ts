@@ -1,9 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as AuthSession from 'expo-auth-session';
 import {
   signOut as firebaseSignOut,
   getIdToken,
   onAuthStateChanged,
   User,
+  signInWithCredential,
+  GoogleAuthProvider,
 } from 'firebase/auth';
 import { auth } from './firebase';
 
@@ -21,29 +24,72 @@ export interface AuthSessionData {
 const STORAGE_KEY = 'auth_session';
 
 /**
- * Google Sign-In using Web Browser OAuth + Firebase
+ * Google Sign-In using OAuth 2.0 + AuthSession + Firebase
  *
  * Flow:
- * 1. Opens browser → Google OAuth2 consent screen
- * 2. User grants permission
- * 3. Browser redirects back to app with ID token in URL fragment
- * 4. Extract ID token and create Firebase credential
- * 5. Sign in to Firebase
+ * 1. Launch Google OAuth consent screen in web browser via AuthSession
+ * 2. User grants permission and is redirected with authorization code
+ * 3. Exchange code for ID token and access token
+ * 4. Create Firebase credential from ID token
+ * 5. Sign in to Firebase with credential
  * 6. Persist user session to AsyncStorage
  */
 export async function signInWithGoogle(): Promise<User> {
   try {
-    // For actual implementation, use expo-auth-session or Firebase's native libraries
-    // This is a placeholder that shows the intended flow
-    throw new Error(
-      'Google Sign-In requires setting up OAuth 2.0 credentials. ' +
-      'See comments in services/auth.ts for setup instructions.'
-    );
+    // Create OAuth request for Google
+    // Using the Firebase Web Client ID (from Firebase Console)
+    const discovery = {
+      authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
+      tokenEndpoint: 'https://www.googleapis.com/oauth2/v4/token',
+      revocationEndpoint: 'https://oauth.googleapis.com/revoke',
+    };
 
-    // TODO: After setting up OAuth credentials, implement using:
-    // - expo-auth-session for pure Expo approach, OR
-    // - Firebase Phone/Email auth as interim solution, OR
-    // - expo-google-sign-in for native Google Sign-In
+    // Get the project ID from Firebase config
+    const projectId = 'todo-list-app-8d8f4';
+
+    // Build OAuth request
+    const request = new AuthSession.AuthRequest({
+      clientId: `${projectId}.apps.googleusercontent.com`,
+      scopes: ['openid', 'profile', 'email'],
+      redirectUri: AuthSession.makeRedirectUri({
+        scheme: 'todoapp',
+      }),
+    });
+
+    // Prompt user with Google OAuth screen
+    const result = await request.promptAsync(discovery);
+
+    if (result.type !== 'success') {
+      throw new Error('Google authentication cancelled or failed');
+    }
+
+    // Extract ID token from response
+    const idToken = result.params.id_token;
+    if (!idToken) {
+      throw new Error('No ID token received from Google');
+    }
+
+    // Create Firebase credential from Google ID token
+    const credential = GoogleAuthProvider.credential(idToken);
+
+    // Sign in to Firebase with the credential
+    const userCredential = await signInWithCredential(auth, credential);
+    const firebaseUser = userCredential.user;
+
+    // Persist session to AsyncStorage
+    const sessionData: AuthSessionData = {
+      user: {
+        uid: firebaseUser.uid,
+        email: firebaseUser.email,
+        displayName: firebaseUser.displayName,
+        photoURL: firebaseUser.photoURL,
+      },
+      idToken: await getIdToken(firebaseUser),
+      refreshToken: firebaseUser.refreshToken,
+    };
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(sessionData));
+
+    return firebaseUser;
   } catch (error) {
     console.error('Google sign-in error:', error);
     throw new Error(
