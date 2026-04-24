@@ -1,14 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
+import * as WebBrowser from 'expo-web-browser';
 import {
   signOut as firebaseSignOut,
   getIdToken,
   GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithCredential,
+  signInWithPopup,
   User,
 } from 'firebase/auth';
 import { auth } from './firebase';
+
+// Complete web browser for OAuth redirect
+WebBrowser.maybeCompleteAuthSession();
 
 export interface AuthSessionData {
   user: {
@@ -24,91 +28,48 @@ export interface AuthSessionData {
 const STORAGE_KEY = 'auth_session';
 
 /**
- * Google Sign-In using OAuth 2.0 + AuthSession + Firebase
+ * Google Sign-In using Firebase's built-in OAuth support
  *
- * IMPORTANT: This uses the native Google OAuth flow with proper error handling.
- * If you get a 400 error, it's likely due to:
- * 1. Client ID not registered in Google Cloud Console
- * 2. Redirect URI not matching what's registered
+ * This implementation uses Firebase's official OAuth handler, which automatically
+ * uses the redirect URIs configured in your Google Cloud OAuth client.
  *
- * SOLUTION: Use Firebase's official approach or set up custom OAuth credentials:
+ * Your OAuth client (in Google Cloud Console) should have these redirect URIs:
+ * - https://<your-firebase-project>.firebaseapp.com/__/auth/handler
+ * - https://<your-firebase-project>.firebaseapp.com/__/auth/handler (for web)
  *
- * Option A (Recommended for Expo): Use Firebase's Web Client ID
- * - Go to: Firebase Console → Project Settings → Service Accounts → Generate new private key
- * - Or: Go to Google Cloud Console → Credentials → Create OAuth 2.0 Web Client
- * - Register redirect URI: urn:ietf:wg:oauth:2.0:oob (for native apps)
- * - Update CLIENT_ID below with your actual Web Client ID
- *
- * Option B (This implementation): Use Expo's URL scheme-based redirect
- * - Requires registering: todoapp://redirect in Google Cloud Console
- * - Go to: Google Cloud Console → APIs & Services → Credentials
- * - Edit the Web Client ID
- * - Add redirect URI: todoapp://redirect (or whatever makeRedirectUri() generates)
+ * Firebase automatically handles the OAuth flow and creates the proper credentials.
+ * For native apps (Expo), we use WebBrowser to handle the OAuth popup redirect.
  */
 export async function signInWithGoogle(): Promise<User> {
   try {
-    // ⚠️ IMPORTANT: Replace with your actual Google OAuth 2.0 Web Client ID
-    // This is NOT your Firebase project ID
-    // Get it from: Google Cloud Console → Credentials → OAuth 2.0 Web Client
-    const CLIENT_ID = 'YOUR_GOOGLE_OAUTH_WEB_CLIENT_ID.apps.googleusercontent.com';
-
-    // Check if CLIENT_ID has been configured
-    if (CLIENT_ID === 'YOUR_GOOGLE_OAUTH_WEB_CLIENT_ID.apps.googleusercontent.com') {
-      throw new Error(
-        'Google OAuth client ID not configured. ' +
-          'Please update CLIENT_ID in services/auth.ts with your actual Web Client ID from Google Cloud Console. ' +
-          'Get it from: https://console.cloud.google.com/apis/credentials'
-      );
-    }
-
-    // Build the redirect URI that Expo will use
-    const redirectUri = AuthSession.makeRedirectUri({
+    // For native apps, we need to configure the redirect URL for the OAuth popup
+    // Firebase will use its handler to complete the OAuth flow
+    const redirectUrl = AuthSession.makeRedirectUri({
       scheme: 'todoapp',
       path: 'redirect',
     });
 
-    console.log('OAuth Redirect URI:', redirectUri);
-    console.log('Client ID:', CLIENT_ID);
+    console.log('Firebase OAuth - Using Firebase handler redirect');
+    console.log('App redirect URL available:', redirectUrl);
 
-    // Create OAuth request for Google
-    const request = new AuthSession.AuthRequest({
-      clientId: CLIENT_ID,
-      scopes: ['openid', 'profile', 'email'],
-      redirectUri: redirectUri,
-    });
+    // Use Firebase's signInWithPopup - on native, it uses web browser for OAuth
+    // Firebase automatically handles the Google OAuth flow with your configured client
+    const provider = new GoogleAuthProvider();
 
-    // Google OAuth endpoints
-    const discovery = {
-      authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
-      tokenEndpoint: 'https://www.googleapis.com/oauth2/v4/token',
-      revocationEndpoint: 'https://oauth.googleapis.com/revoke',
-    };
+    // Set scopes
+    provider.addScope('profile');
+    provider.addScope('email');
 
-    // Prompt user with Google OAuth screen
-    const result = await request.promptAsync(discovery);
-
-    if (result.type !== 'success') {
-      throw new Error(
-        `Google authentication ${result.type || 'failed'}. ` +
-          `Make sure your Google OAuth client ID is registered with redirect URI: ${redirectUri}`
-      );
-    }
-
-    // Extract ID token from response
-    const idToken = (result as any).params?.id_token || (result as any).params?.access_token;
-    if (!idToken) {
-      throw new Error(
-        'No ID token received from Google. ' +
-          'Ensure your OAuth client ID and redirect URI are properly configured in Google Cloud Console.'
-      );
-    }
-
-    // Create Firebase credential from Google ID token
-    const credential = GoogleAuthProvider.credential(idToken);
-
-    // Sign in to Firebase with the credential
-    const userCredential = await signInWithCredential(auth, credential);
+    // Sign in using Firebase's built-in OAuth support
+    // On Expo/React Native, this will open a browser for the OAuth flow
+    // Firebase will handle the redirect and credential creation automatically
+    const userCredential = await signInWithPopup(auth, provider);
     const firebaseUser = userCredential.user;
+
+    console.log('Firebase sign-in successful:', {
+      uid: firebaseUser.uid,
+      email: firebaseUser.email,
+    });
 
     // Persist session to AsyncStorage
     const sessionData: AuthSessionData = {
@@ -126,8 +87,26 @@ export async function signInWithGoogle(): Promise<User> {
     return firebaseUser;
   } catch (error) {
     console.error('Google sign-in error:', error);
+
+    // Provide helpful error messages
+    if (error instanceof Error) {
+      if (error.message.includes('popup_blocked_by_browser')) {
+        throw new Error('Popup was blocked. Please allow popups and try again.');
+      }
+      if (error.message.includes('cancelled')) {
+        throw new Error('Sign-in was cancelled.');
+      }
+      if (error.message.includes('invalid_grant')) {
+        throw new Error(
+          'Authentication failed. Make sure your Firebase project has Google sign-in enabled ' +
+            'and your OAuth client is properly configured.'
+        );
+      }
+    }
+
     throw new Error(
-      `Sign-in failed: ${error instanceof Error ? error.message : 'Unknown error'}`
+      `Sign-in failed: ${error instanceof Error ? error.message : 'Unknown error'}. ` +
+        'Make sure Google sign-in is enabled in Firebase Authentication.'
     );
   }
 }
