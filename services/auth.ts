@@ -226,8 +226,18 @@ export async function signInWithGoogle(): Promise<User> {
             '3) Redirect URI matches exactly in Google Cloud Console'
         );
       }
+      // If error was already a custom error from our code, rethrow as-is
+      if (error.message.includes('Google OAuth Client ID not configured') ||
+          error.message.includes('Sign-in was cancelled') ||
+          error.message.includes('Invalid OAuth') ||
+          error.message.includes('Redirect URI mismatch') ||
+          error.message.includes('Malformed OAuth') ||
+          error.message.includes('No ID token received')) {
+        throw error;
+      }
     }
 
+    // Generic fallback for unexpected errors
     throw new Error(
       `Sign-in failed: ${error instanceof Error ? error.message : 'Unknown error'}. ` +
         'Make sure Google sign-in is enabled in Firebase Authentication.'
@@ -266,10 +276,20 @@ export async function restoreSession(): Promise<AuthSessionData | null> {
       // Refresh the token to ensure it's still valid
       const idToken = await getIdToken(auth.currentUser, true);
       session.idToken = idToken;
+      // Update user data to match current Firebase user
+      session.user = {
+        uid: auth.currentUser.uid,
+        email: auth.currentUser.email,
+        displayName: auth.currentUser.displayName,
+        photoURL: auth.currentUser.photoURL,
+      };
       await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+      return session;
     }
 
-    return session;
+    // Session stored but user not found in Firebase - session is invalid
+    await AsyncStorage.removeItem(STORAGE_KEY);
+    return null;
   } catch (error) {
     console.error('Session restoration error:', error);
     // Clear invalid session
