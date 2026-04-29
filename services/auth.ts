@@ -110,13 +110,14 @@ export async function signInWithGoogle(): Promise<User> {
       responseType: AuthSession.ResponseType.IdToken,
       // Use Expo's proxy server - required for Web Client ID in native apps
       usePKCE: false,
+      // Use Expo proxy for OAuth redirect (required for Web Client ID in native apps)
+      useProxy: true,
       // Prompt user to select account / login
       prompt: AuthSession.Prompt.Login,
       // Generate redirect URI using Expo scheme registered in app.json
       redirectUri: AuthSession.makeRedirectUri({
         scheme: 'todoapp',
         path: 'oauth-redirect',
-        useProxy: true, // Tell Expo to handle the redirect via proxy
       }),
     });
 
