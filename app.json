@@ -2,10 +2,11 @@
   "expo": {
     "name": "TodoApp",
     "slug": "TodoApp",
+    "owner": "araragi_okio",
+    "scheme": "todoapp",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "todoapp",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true

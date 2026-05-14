@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as AuthSession from 'expo-auth-session';
-import * as WebBrowser from 'expo-web-browser';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
+import * as Crypto from 'expo-crypto';
 import {
   signOut as firebaseSignOut,
   getIdToken,
@@ -11,9 +12,6 @@ import {
 } from 'firebase/auth';
 import { auth } from './firebase';
 
-// Ensure WebBrowser is properly initialized for OAuth redirect handling
-WebBrowser.maybeCompleteAuthSession();
-
 /**
  * Google OAuth Web Client ID from Google Cloud Console
  * 
@@ -22,8 +20,7 @@ WebBrowser.maybeCompleteAuthSession();
  * 2. Navigate to "APIs & Services" → "Credentials"
  * 3. Create OAuth 2.0 credential → "Web application"
  * 4. Add Authorized Redirect URIs:
- *    - https://auth.expo.io/@YOUR_EXPO_USERNAME/TodoApp/callback
- *    - https://localhost:19000 (for local testing with Expo Go)
+ *    - https://auth.expo.io/@YOUR_EXPO_USERNAME/TodoApp
  * 5. Copy the Client ID and paste below (NOT the Firebase Project ID)
  * 
  * This is different from:
@@ -33,6 +30,8 @@ WebBrowser.maybeCompleteAuthSession();
  * The Web Client ID format: xxxxx.apps.googleusercontent.com
  */
 const GOOGLE_OAUTH_CLIENT_ID = process.env.EXPO_PUBLIC_GOOGLE_OAUTH_CLIENT_ID || 'YOUR_GOOGLE_OAUTH_WEB_CLIENT_ID.apps.googleusercontent.com';
+const GOOGLE_OAUTH_REDIRECT_URI = process.env.EXPO_PUBLIC_GOOGLE_OAUTH_REDIRECT_URI;
+const EXPO_PROJECT_FULL_NAME = process.env.EXPO_PUBLIC_EXPO_PROJECT_FULL_NAME;
 
 export interface AuthSessionData {
   user: {
@@ -47,15 +46,74 @@ export interface AuthSessionData {
 
 const STORAGE_KEY = 'auth_session';
 
+function normalizeExpoProxyRedirectUri(redirectUri: string): string {
+  if (
+    redirectUri.startsWith('https://auth.expo.io/') &&
+    redirectUri.endsWith('/callback')
+  ) {
+    return redirectUri.slice(0, -'/callback'.length);
+  }
+
+  return redirectUri;
+}
+
+function getExpoGoProxyRedirectUri(): string {
+  if (GOOGLE_OAUTH_REDIRECT_URI) {
+    return normalizeExpoProxyRedirectUri(GOOGLE_OAUTH_REDIRECT_URI);
+  }
+
+  if (EXPO_PROJECT_FULL_NAME) {
+    return `https://auth.expo.io/${EXPO_PROJECT_FULL_NAME}`;
+  }
+
+  try {
+    return AuthSession.getRedirectUrl();
+  } catch {
+    throw new Error(
+      'Expo Go needs an HTTPS AuthSession proxy redirect. Set ' +
+        'EXPO_PUBLIC_EXPO_PROJECT_FULL_NAME=@your-expo-username/TodoApp or ' +
+        'EXPO_PUBLIC_GOOGLE_OAUTH_REDIRECT_URI=https://auth.expo.io/@your-expo-username/TodoApp'
+    );
+  }
+}
+
+function getGoogleRedirectUri(): string {
+  return getExpoGoProxyRedirectUri();
+}
+
+function getAuthReturnUri(isExpoGo: boolean): string {
+  if (isExpoGo) {
+    return AuthSession.makeRedirectUri();
+  }
+
+  return AuthSession.makeRedirectUri({
+    scheme: 'todoapp',
+    native: 'todoapp://',
+  });
+}
+
+function replaceAuthUrlRedirectUri(authUrl: string, redirectUri: string): string {
+  const url = new URL(authUrl);
+  url.searchParams.set('redirect_uri', redirectUri);
+  return url.toString();
+}
+
+function buildExpoGoStartUrl(authUrl: string, returnUrl: string, proxyRedirectUri: string): string {
+  return `${proxyRedirectUri}/start?${new URLSearchParams({
+    authUrl,
+    returnUrl,
+  }).toString()}`;
+}
+
 /**
  * Google Sign-In for Expo React Native using OAuth 2.0 + Firebase
  *
  * This implementation uses the proper Expo + Firebase sign-in flow:
- * 1. AuthSession handles OAuth 2.0 implicit flow with Expo proxy (useProxy: true)
- * 2. Request ID token directly (responseType: IdToken) from Google authorization server
- * 3. User authorizes in browser → Google redirects to app with ID token
- * 4. Create Firebase credential from ID token
- * 5. Firebase signInWithCredential() authenticates with Firebase
+  * 1. AuthSession handles OAuth 2.0 implicit flow with an HTTPS redirect URI
+  * 2. Request ID token directly (responseType: IdToken) from Google authorization server
+  * 3. User authorizes in browser → Google redirects to app with ID token
+  * 4. Create Firebase credential from ID token
+  * 5. Firebase signInWithCredential() authenticates with Firebase
  * 6. Session persisted to AsyncStorage
  *
  * Configuration Requirements:
@@ -65,7 +123,7 @@ const STORAGE_KEY = 'auth_session';
  *
  * - Redirect URI Registration (in BOTH places):
  *   a) Google Cloud Console:
- *      - https://auth.expo.io/@YOUR_EXPO_USERNAME/TodoApp/callback
+ *      - https://auth.expo.io/@YOUR_EXPO_USERNAME/TodoApp
  *      - https://localhost:19000 (for local Expo Go testing)
  *   b) Firebase Console:
  *      - Authentication → Google → Custom Domain (if using custom domain)
@@ -75,9 +133,9 @@ const STORAGE_KEY = 'auth_session';
  *
  * Key Differences from Mobile OAuth:
  * - Uses Web Client ID (not Android/iOS credentials)
- * - useProxy: true leverages Expo's redirect proxy for native apps
- * - Implicit flow (responseType: IdToken) avoids backend token exchange
- * - Works on Expo Go, standalone app, and web (same client ID)
+  * - Expo Go uses the auth.expo.io HTTPS redirect proxy because Google rejects exp:// URIs
+  * - Implicit flow (responseType: IdToken) avoids backend token exchange
+  * - Works on Expo Go, standalone app, and web (same client ID)
  *
  * Error Handling:
  * - 400 Malformed Request: Usually means placeholder client ID or redirect URI mismatch
@@ -101,32 +159,37 @@ export async function signInWithGoogle(): Promise<User> {
       throw new Error('OAuth discovery failed. Unable to reach OAuth server.');
     }
 
+    const isExpoGo = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+    const returnUrl = getAuthReturnUri(isExpoGo);
+    const nonce = Crypto.randomUUID();
+
     // Configure the OAuth request with proper Expo + Firebase flow
-    // Key: useProxy: true allows Web Client ID to work with native apps via Expo's proxy
     const request = new AuthSession.AuthRequest({
       clientId: GOOGLE_OAUTH_CLIENT_ID,
       scopes: ['openid', 'profile', 'email'],
       // Implicit flow: directly request ID token (not authorization code)
       responseType: AuthSession.ResponseType.IdToken,
-      // Use Expo's proxy server - required for Web Client ID in native apps
       usePKCE: false,
-      // Use Expo proxy for OAuth redirect (required for Web Client ID in native apps)
-      useProxy: true,
       // Prompt user to select account / login
       prompt: AuthSession.Prompt.Login,
-      // Generate redirect URI using Expo scheme registered in app.json
-      redirectUri: AuthSession.makeRedirectUri({
-        scheme: 'todoapp',
-        path: 'oauth-redirect',
-      }),
+      redirectUri: returnUrl,
+      extraParams: { nonce },
     });
 
     console.log('Starting Google OAuth flow...');
     console.log('OAuth Client ID:', GOOGLE_OAUTH_CLIENT_ID);
     console.log('Redirect URI:', request.redirectUri);
 
-    // Prompt user to authorize (opens browser)
-    const result = await request.promptAsync(discovery);
+    let result: AuthSession.AuthSessionResult;
+    if (isExpoGo) {
+      const proxyRedirectUri = getExpoGoProxyRedirectUri();
+      const authUrl = await request.makeAuthUrlAsync(discovery);
+      const proxyAuthUrl = replaceAuthUrlRedirectUri(authUrl, proxyRedirectUri);
+      const startUrl = buildExpoGoStartUrl(proxyAuthUrl, returnUrl, proxyRedirectUri);
+      result = await request.promptAsync(discovery, { url: startUrl });
+    } else {
+      result = await request.promptAsync(discovery);
+    }
 
     // Check if user cancelled
     if (result.type !== 'success') {
@@ -210,9 +273,7 @@ export async function signInWithGoogle(): Promise<User> {
       }
       if (error.message.includes('redirect_uri_mismatch')) {
         throw new Error(
-          'Redirect URI mismatch. Ensure the redirect URI is registered in: ' +
-            '1. Google Cloud Console → OAuth 2.0 Web Client ' +
-            '2. Firebase Console → Authentication → Google → Redirect URIs'
+          `Redirect URI mismatch. Register this exact URI in the Google OAuth Web Client: ${getGoogleRedirectUri()}`
         );
       }
       if (error.message.includes('malformed')) {

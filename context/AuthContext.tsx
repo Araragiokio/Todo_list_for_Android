@@ -1,10 +1,10 @@
 import {
-    signOut as authSignOut,
-    getCurrentUser,
-    getValidIdToken,
-    onAuthChange,
-    restoreSession,
-    signInWithGoogle,
+  signOut as authSignOut,
+  getCurrentUser,
+  getValidIdToken,
+  onAuthChange,
+  restoreSession,
+  signInWithGoogle,
 } from '@/services/auth';
 import { User } from 'firebase/auth';
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';

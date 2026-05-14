@@ -1,14 +1,17 @@
-import { useState, useEffect } from 'react';
-import { Stack } from 'expo-router';
+import SplashScreen from '@/app/splash';
 import { AuthProvider } from '@/context/AuthContext';
 import { ThemeProvider } from '@/context/ThemeContext';
-import SplashScreen from '@/app/splash';
 import {
-  requestNotificationPermission,
-  scheduleMorningDigest,
-  snoozeNotification,
+    requestNotificationPermission,
+    scheduleMorningDigest,
+    snoozeNotification,
 } from '@/services/NotificationService';
 import * as Notifications from 'expo-notifications';
+import { Stack } from 'expo-router';
+import * as WebBrowser from 'expo-web-browser';
+import { useEffect, useState } from 'react';
+
+WebBrowser.maybeCompleteAuthSession();
 
 export default function RootLayout() {
   const [splashDone, setSplashDone] = useState(false);
