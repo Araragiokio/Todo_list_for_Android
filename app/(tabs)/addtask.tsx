@@ -1,6 +1,7 @@
 import { DEFAULT_CATEGORIES, getCategoryInfo } from '@/constants/Categories';
 import { useTheme } from '@/context/ThemeContext';
-import { addTask, getCustomCategories } from '@/storage/TaskStorage';
+import { addTask } from '@/services/TaskService';
+import { getCustomCategories } from '@/storage/TaskStorage';
 import { EnergyLevel, Priority, RecurringType, Subtask, TaskInput } from '@/Types/Task';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';

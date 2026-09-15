@@ -8,7 +8,7 @@ import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../context/ThemeContext';
-import { editTask, getTasks, toggleTask } from '../../storage/TaskStorage';
+import { fetchTasks, toggleTask, updateTask } from '../../services/TaskService';
 import { Task } from '../../Types/Task';
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -148,7 +148,7 @@ export default function RemindersScreen() {
   const [refreshing, setRefreshing] = useState(false);
 
   const loadTasks = async () => {
-    const all = await getTasks();
+    const all = await fetchTasks();
     setTasks(all.filter(t => !t.completed && t.dueDate));
   };
 
@@ -177,7 +177,7 @@ const upcomingTasks = tasks.filter(t => t.dueDate && isFuture(t.dueDate) && !isT
 const snoozeTask = async (task: Task, minutes: number) => {
   const base = task.dueDate ? new Date(task.dueDate) : new Date();
   const newDate = new Date(base.getTime() + minutes * 60000);
-  await editTask(task.id, {
+  await updateTask(task.id, {
     title: task.title, category: task.category, tags: task.tags,
     energyLevel: task.energyLevel, priority: task.priority,
     dueDate: newDate.toISOString(), reminder: newDate.toISOString(),
@@ -224,7 +224,7 @@ const snoozeTask = async (task: Task, minutes: number) => {
           finalDate.setMinutes(selectedTime.getMinutes());
           finalDate.setSeconds(0);
 
-          await editTask(task.id, {
+          await updateTask(task.id, {
             title: task.title, category: task.category, tags: task.tags,
             energyLevel: task.energyLevel, priority: task.priority,
             dueDate: finalDate.toISOString(), reminder: finalDate.toISOString(),

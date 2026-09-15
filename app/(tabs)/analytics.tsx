@@ -1,5 +1,5 @@
 import { useTheme } from '@/context/ThemeContext';
-import { getTasks } from '@/storage/TaskStorage';
+import { fetchTasks } from '@/services/TaskService';
 import { Task } from '@/Types/Task';
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
@@ -18,7 +18,7 @@ export default function AnalyticsScreen() {
   });
 
   const loadTasks = useCallback(async () => {
-    const allTasks = await getTasks();
+    const allTasks = await fetchTasks();
     setTasks(allTasks);
 
     const completed = allTasks.filter(t => t.completed).length;

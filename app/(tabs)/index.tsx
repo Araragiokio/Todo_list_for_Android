@@ -2,13 +2,13 @@ import { DEFAULT_CATEGORIES, getCategoryInfo } from '@/constants/Categories';
 import { useTheme } from '@/context/ThemeContext';
 import {
   deleteTask,
-  getActiveTasks,
-  getCustomCategories,
-  getTasks,
+  fetchActiveTasks,
+  fetchTasks,
   toggleSubtask,
   toggleTask,
   updateSortOrder,
-} from '@/storage/TaskStorage';
+} from '@/services/TaskService';
+import { getCustomCategories } from '@/storage/TaskStorage';
 import { Task } from '@/Types/Task';
 import { Ionicons } from '@expo/vector-icons';
 import { router, useFocusEffect } from 'expo-router';
@@ -115,7 +115,7 @@ export default function HomeScreen() {
   }, [sort, sortedActive.length]);
 
   const loadAll = async () => {
-    const loaded = await getActiveTasks();
+    const loaded = await fetchActiveTasks();
     const custom = await getCustomCategories();
     setTasks(loaded);
     setCustomCategories(custom);
@@ -124,7 +124,7 @@ export default function HomeScreen() {
   const handleToggle = async (id: string) => {
     await toggleTask(id);
     await loadAll();
-    const current = await getActiveTasks();
+    const current = await fetchActiveTasks();
     const task = current.find(t => t.id === id);
     const nowCompleted = task?.completed ?? false;
     const allDone = current.length > 0 && current.every(t => t.completed);
@@ -157,12 +157,12 @@ export default function HomeScreen() {
   };
 
   const handleSubtaskToggle = async (taskId: string, subtaskId: string) => {
-    const prevTasks = await getActiveTasks();
+    const prevTasks = await fetchActiveTasks();
     const task = prevTasks.find(t => t.id === taskId);
     const wasCompleted = task?.completed ?? false;
     await toggleSubtask(taskId, subtaskId);
     await loadAll();
-    const current = await getActiveTasks();
+    const current = await fetchActiveTasks();
     const updated = current.find(t => t.id === taskId);
     const nowCompleted = updated?.completed ?? false;
     const allDone = current.length > 0 && current.every(t => t.completed);
@@ -196,21 +196,27 @@ export default function HomeScreen() {
 
   const handleManualDragEnd = useCallback(async ({ data }: { data: Task[] }) => {
     setManualOrderedActive(data);
-    const all = await getTasks();
+    const all = await fetchTasks();
     const others = all.filter(t => !data.some(d => d.id === t.id));
     await updateSortOrder([...data, ...others]);
     loadAll();
   }, []);
 
-  const renderRightActions = (item: Task) => () => (
-    <TouchableOpacity
-      style={[styles.swipeDelete, { backgroundColor: colors.danger }]}
-      onPress={() => handleDelete(item.id)}
-    >
-      <Ionicons name="trash-outline" size={22} color="#fff" />
-      <Text style={styles.swipeDeleteText}>Delete</Text>
-    </TouchableOpacity>
-  );
+  const renderRightActions = (item: Task) => {
+    function RightActions() {
+      return (
+        <TouchableOpacity
+          style={[styles.swipeDelete, { backgroundColor: colors.danger }]}
+          onPress={() => handleDelete(item.id)}
+        >
+          <Ionicons name="trash-outline" size={22} color="#fff" />
+          <Text style={styles.swipeDeleteText}>Delete</Text>
+        </TouchableOpacity>
+      );
+    }
+
+    return RightActions;
+  };
 
   const renderTaskContent = (item: Task) => {
     const catInfo = getCategoryInfo(item.category, customCategories);
@@ -374,7 +380,7 @@ export default function HomeScreen() {
         {/* Progress */}
         <View style={[styles.progressCard, { backgroundColor: colors.card }]}>
           <View style={styles.progressRow}>
-            <Text style={[styles.progressLabel, { color: colors.text }]}>Today's Progress</Text>
+            <Text style={[styles.progressLabel, { color: colors.text }]}>{"Today's Progress"}</Text>
             <Text style={[styles.progressCount, { color: colors.accent }]}>
               {completedCount}/{tasks.length} tasks
             </Text>

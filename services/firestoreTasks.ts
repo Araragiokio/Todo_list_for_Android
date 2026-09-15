@@ -1,9 +1,22 @@
-import { collection, CollectionReference, doc, DocumentReference } from 'firebase/firestore';
+import {
+  collection,
+  CollectionReference,
+  doc,
+  DocumentReference,
+  getDocs,
+  setDoc,
+} from 'firebase/firestore';
 
 import { Task } from '@/Types/Task';
 import { db } from './firebase';
 
-export type FirestoreTask = Task;
+type FirestoreDateValue = string | null | Date | { toDate: () => Date };
+
+export type FirestoreTask = Omit<Task, 'createdAt' | 'dueDate' | 'reminder'> & {
+  createdAt: FirestoreDateValue;
+  dueDate: FirestoreDateValue;
+  reminder: FirestoreDateValue;
+};
 
 // Task documents mirror the Task interface (ISO string dates for dueDate/reminder/createdAt).
 export function getUserTasksCollectionRef(uid: string): CollectionReference<FirestoreTask> {
@@ -18,6 +31,40 @@ export function toFirestoreTask(task: Task): FirestoreTask {
   return { ...task };
 }
 
-export function fromFirestoreTask(data: FirestoreTask): Task {
-  return { ...data };
+function toIsoString(value: FirestoreDateValue): string | null {
+  if (!value) {
+    return null;
+  }
+
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  return value.toDate().toISOString();
+}
+
+export function fromFirestoreTask(data: FirestoreTask, id = data.id): Task {
+  return {
+    ...data,
+    id,
+    createdAt: toIsoString(data.createdAt) ?? new Date().toISOString(),
+    dueDate: toIsoString(data.dueDate),
+    reminder: toIsoString(data.reminder),
+  };
+}
+
+export async function saveUserTask(uid: string, task: Task): Promise<void> {
+  const taskRef = getUserTaskDocRef(uid, task.id);
+  await setDoc(taskRef, toFirestoreTask(task));
+}
+
+export async function fetchUserTasks(uid: string): Promise<Task[]> {
+  const tasksSnapshot = await getDocs(getUserTasksCollectionRef(uid));
+  return tasksSnapshot.docs
+    .map(taskDoc => fromFirestoreTask(taskDoc.data(), taskDoc.id))
+    .sort((a, b) => a.sortOrder - b.sortOrder);
 }

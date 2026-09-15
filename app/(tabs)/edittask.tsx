@@ -1,6 +1,7 @@
 import { DEFAULT_CATEGORIES, getCategoryInfo } from '@/constants/Categories';
 import { useTheme } from '@/context/ThemeContext';
-import { editTask, getCustomCategories, getTasks } from '@/storage/TaskStorage';
+import { fetchTasks, updateTask } from '@/services/TaskService';
+import { getCustomCategories } from '@/storage/TaskStorage';
 import { EnergyLevel, Priority, RecurringType, Subtask, TaskInput } from '@/Types/Task';
 import { Ionicons } from '@expo/vector-icons';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
@@ -63,7 +64,7 @@ export default function EditTaskScreen() {
 
   const loadTask = async () => {
     if (!id) return;
-    const all = await getTasks();
+    const all = await fetchTasks();
     const task = all.find(t => t.id === id);
     if (!task) {
       Alert.alert('Error', 'Task not found.');
@@ -119,7 +120,7 @@ export default function EditTaskScreen() {
         recurring,
         recurringDay,
       };
-      await editTask(id, taskInput);
+      await updateTask(id, taskInput);
       router.back();
     } catch  {
       Alert.alert('Error', 'Failed to save task. Please try again.');

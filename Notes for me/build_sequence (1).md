@@ -1,4 +1,4 @@
-# TodoApp — Build Sequence 🗡️
+    # TodoApp — Build Sequence 🗡️
 
 ### Updated after Product Design Revision — March 2026
 
@@ -199,6 +199,7 @@
 **Step 19 — Category Analysis \& Insights**
 
 * Donut chart + bar chart toggle
+* heatmap inspired by gitub
 * Week / Month / Year toggle
 * Smart insights + encouragement messages ✅
 
