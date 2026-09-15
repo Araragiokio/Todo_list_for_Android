@@ -11,6 +11,7 @@ import {
   User,
 } from 'firebase/auth';
 import { auth } from './firebase';
+import { ensureUserDocument } from './firestoreUsers';
 
 /**
  * Google OAuth Web Client ID from Google Cloud Console
@@ -242,6 +243,8 @@ export async function signInWithGoogle(): Promise<User> {
       uid: firebaseUser.uid,
       email: firebaseUser.email,
     });
+
+    await ensureUserDocument(firebaseUser);
 
     // Persist session to AsyncStorage
     const sessionData: AuthSessionData = {
