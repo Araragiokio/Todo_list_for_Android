@@ -16,6 +16,7 @@ export interface UserProfileDocument {
   uid: string;
   name: string | null;
   email: string | null;
+  photoURL?: string | null;
   createdAt: FieldValue;
 }
 
@@ -35,8 +36,22 @@ export async function ensureUserDocument(user: User): Promise<void> {
     uid: user.uid,
     name: user.displayName ?? null,
     email: user.email ?? null,
+    photoURL: user.photoURL ?? null,
     createdAt: serverTimestamp(),
   };
 
   await setDoc(userRef, payload);
+}
+
+export async function getUserPhotoURL(uid: string): Promise<string | null> {
+  const snapshot = await getDoc(getUserDocRef(uid));
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  return snapshot.data().photoURL ?? null;
+}
+
+export async function updateUserPhotoURL(uid: string, photoURL: string): Promise<void> {
+  await setDoc(getUserDocRef(uid), { photoURL }, { merge: true });
 }

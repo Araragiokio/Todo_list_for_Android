@@ -1,14 +1,104 @@
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
+import {
+  getMyProfilePhotoURL,
+  ProfilePictureError,
+  uploadAndSaveProfilePicture,
+} from '@/services/profilePicture';
 import { Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfileScreen() {
   const { colors } = useTheme();
   const router = useRouter();
   const { user, isAuthenticating, isLoading, signIn, signOut, error } = useAuth();
+  const [savedPhotoURL, setSavedPhotoURL] = useState<string | null>(null);
+  const [isUpdatingPhoto, setIsUpdatingPhoto] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadSavedPhoto = async () => {
+      if (!user) {
+        setSavedPhotoURL(null);
+        setPhotoError(null);
+        return;
+      }
+
+      try {
+        const firestorePhotoURL = await getMyProfilePhotoURL();
+        if (!cancelled && firestorePhotoURL) {
+          setSavedPhotoURL(firestorePhotoURL);
+        }
+      } catch {
+        // Keep showing the auth photo if Firestore is unavailable.
+      }
+    };
+
+    void loadSavedPhoto();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.uid]);
+
+  const displayPhotoURL = savedPhotoURL ?? user?.photoURL ?? null;
+
+  const handleChangeProfilePicture = async () => {
+    if (!user || isUpdatingPhoto) {
+      return;
+    }
+
+    setPhotoError(null);
+
+    try {
+      const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      let result: ImagePicker.ImagePickerResult;
+
+      try {
+        result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ['images'],
+          allowsEditing: true,
+          aspect: [1, 1],
+          quality: 0.6,
+        });
+      } catch {
+        if (!permission.granted) {
+          Alert.alert(
+            'Photo access needed',
+            'Allow photo access in system settings to choose a profile picture.',
+          );
+          return;
+        }
+        throw new ProfilePictureError('Could not open the photo gallery.');
+      }
+
+      if (!permission.granted && result.canceled) {
+        return;
+      }
+
+      if (result.canceled || !result.assets[0]?.uri) {
+        return;
+      }
+
+      setIsUpdatingPhoto(true);
+      const nextPhotoURL = await uploadAndSaveProfilePicture(result.assets[0].uri);
+      setSavedPhotoURL(nextPhotoURL);
+    } catch (err) {
+      const message =
+        err instanceof ProfilePictureError
+          ? err.message
+          : 'Could not update your profile picture. Please try again.';
+      setPhotoError(message);
+    } finally {
+      setIsUpdatingPhoto(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -36,16 +126,32 @@ export default function ProfileScreen() {
       {user ? (
         // Signed in: Show user profile
         <View style={styles.profileContainer}>
-          {user.photoURL ? (
-            <Image
-              source={{ uri: user.photoURL }}
-              style={styles.avatar}
-            />
-          ) : (
-            <View style={[styles.avatarPlaceholder, { backgroundColor: colors.card }]}>
-              <Ionicons name="person" size={48} color={colors.accent} />
+          <TouchableOpacity
+            onPress={handleChangeProfilePicture}
+            disabled={isUpdatingPhoto}
+            accessibilityRole="button"
+            accessibilityLabel="Change profile picture"
+          >
+            <View>
+              {displayPhotoURL ? (
+                <Image
+                  source={{ uri: displayPhotoURL }}
+                  style={styles.avatar}
+                />
+              ) : (
+                <View style={[styles.avatarPlaceholder, { backgroundColor: colors.card }]}>
+                  <Ionicons name="person" size={48} color={colors.accent} />
+                </View>
+              )}
+              <View style={[styles.cameraBadge, { backgroundColor: colors.accent }]}>
+                {isUpdatingPhoto ? (
+                  <ActivityIndicator size="small" color={colors.background} />
+                ) : (
+                  <Ionicons name="camera" size={16} color={colors.background} />
+                )}
+              </View>
             </View>
-          )}
+          </TouchableOpacity>
 
           <Text style={[styles.displayName, { color: colors.text }]}>
             {user.displayName || 'User'}
@@ -71,9 +177,9 @@ export default function ProfileScreen() {
             )}
           </TouchableOpacity>
 
-          {error && (
-            <Text style={[styles.errorText, { color: '#ef4444' }]}>
-              {error}
+          {(photoError || error) && (
+            <Text style={[styles.errorText, { color: colors.danger }]}>
+              {photoError || error}
             </Text>
           )}
         </View>
@@ -153,6 +259,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
+  },
+  cameraBadge: {
+    position: 'absolute',
+    right: 0,
+    bottom: 16,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   displayName: {
     fontSize: 24,

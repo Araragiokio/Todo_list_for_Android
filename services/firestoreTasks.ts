@@ -5,6 +5,7 @@ import {
   DocumentReference,
   getDocs,
   setDoc,
+  onSnapshot,
 } from 'firebase/firestore';
 
 import { Task } from '@/Types/Task';
@@ -68,3 +69,21 @@ export async function fetchUserTasks(uid: string): Promise<Task[]> {
     .map(taskDoc => fromFirestoreTask(taskDoc.data(), taskDoc.id))
     .sort((a, b) => a.sortOrder - b.sortOrder);
 }
+
+/**
+ * Subscribe to real‑time updates of a user's tasks.
+ * Returns an unsubscribe function that detaches the Firestore listener.
+ */
+export function subscribeUserTasks(
+  uid: string,
+  onChange: (tasks: Task[]) => void,
+): () => void {
+  const unsub = onSnapshot(getUserTasksCollectionRef(uid), (snapshot) => {
+    const tasks = snapshot.docs
+      .map((doc) => fromFirestoreTask(doc.data(), doc.id))
+      .sort((a, b) => a.sortOrder - b.sortOrder);
+    onChange(tasks);
+  });
+  return unsub;
+}
+

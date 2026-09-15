@@ -3,15 +3,15 @@ import { useTheme } from '@/context/ThemeContext';
 import {
   deleteTask,
   fetchActiveTasks,
-  fetchTasks,
   toggleSubtask,
   toggleTask,
   updateSortOrder,
+  subscribeToTasks,
 } from '@/services/TaskService';
 import { getCustomCategories } from '@/storage/TaskStorage';
 import { Task } from '@/Types/Task';
 import { Ionicons } from '@expo/vector-icons';
-import { router, useFocusEffect } from 'expo-router';
+import { router } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
