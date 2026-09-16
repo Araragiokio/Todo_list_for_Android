@@ -1,0 +1,61 @@
+TodoApp Project Overview
+========================
+
+Repository:
+- Name: TodoApp (Todo_list_for_Android)
+- Type: Expo + React Native + TypeScript mobile app
+- Purpose: Anime-inspired productivity app for task management, reminders, progress tracking, and personalization
+
+Core Features:
+- Task creation, editing, completion, and deletion
+- Category-based organization with default and custom categories
+- Priority support for task planning
+- Reminder and notification scheduling for tasks
+- Recurring task behavior (daily/weekly/monthly/yearly patterns)
+- Light and dark theme support
+- Dashboard-style productivity indicators (badges/achievements/progress visuals)
+- Firebase-backed cloud sync support
+
+Tech Stack:
+- React Native 0.81
+- Expo SDK 54
+- TypeScript
+- Expo Router for file-based navigation
+- AsyncStorage for local persistence
+- Expo Notifications for reminders and daily digest flows
+- Firebase for backend/cloud sync features
+
+Project Structure:
+- /app
+  - Expo Router screens and layouts
+  - Root layout handles app shell behavior, splash flow, and notification setup
+  - Tab layout defines main navigation (Home, Add Task, Reminders, Settings, Profile)
+- /context
+  - Theme context and persisted theme preference
+- /storage
+  - Task persistence logic, custom categories, active-task filtering, and task order handling
+- /services
+  - Notification permissions and scheduling/cancel helpers
+- /Types
+  - Domain models, including Task and TaskInput contracts
+- /constants
+  - Shared constants including theme color maps
+
+Data & Domain Conventions:
+- TaskInput is used when creating/updating tasks
+- Task is the persisted entity shape with generated fields (id, createdAt, completed, sortOrder)
+- dueDate and reminder are stored as ISO strings or null
+- Category display data is resolved via category helper logic
+- Manual task ordering is persisted via sortOrder updates
+
+Build & Developer Commands:
+- Install dependencies: npm install
+- Start dev server: npm run start
+- Run on Android: npm run android
+- Run on iOS: npm run ios
+- Run on web: npm run web
+- Lint: npm run lint
+
+Notes:
+- No dedicated test script is currently configured in package.json.
+- The app uses path alias imports via @/* for internal modules.
