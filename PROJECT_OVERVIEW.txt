@@ -11,7 +11,7 @@ Core Features:
 - Category-based organization with default and custom categories
 - Priority support for task planning
 - Reminder and notification scheduling for tasks
-- Recurring task behavior (weekly/monthly patterns)
+- Recurring task behavior (daily/weekly/monthly/yearly patterns)
 - Light and dark theme support
 - Dashboard-style productivity indicators (badges/achievements/progress visuals)
 - Firebase-backed cloud sync support
