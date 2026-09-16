@@ -1,8 +1,11 @@
 import { DEFAULT_CATEGORIES, getCategoryInfo } from '@/constants/Categories';
 import { useTheme } from '@/context/ThemeContext';
+import { getCurrentUser } from '@/services/auth';
 import {
   deleteTask,
   fetchActiveTasks,
+  fetchTasks,
+  filterRecurringTasks,
   toggleSubtask,
   toggleTask,
   updateSortOrder,
@@ -11,7 +14,7 @@ import {
 import { getCustomCategories } from '@/storage/TaskStorage';
 import { Task } from '@/Types/Task';
 import { Ionicons } from '@expo/vector-icons';
-import { router } from 'expo-router';
+import { router, useFocusEffect } from 'expo-router';
 import LottieView from 'lottie-react-native';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -104,6 +107,16 @@ export default function HomeScreen() {
     ? manualOrderedActive
     : sortedActive;
 
+  useEffect(() => {
+    const unsubscribe = subscribeToTasks((loadedTasks) => {
+      setTasks(filterRecurringTasks(loadedTasks));
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       loadAll();
@@ -115,10 +128,12 @@ export default function HomeScreen() {
   }, [sort, sortedActive.length]);
 
   const loadAll = async () => {
-    const loaded = await fetchActiveTasks();
     const custom = await getCustomCategories();
-    setTasks(loaded);
     setCustomCategories(custom);
+    if (!getCurrentUser()) {
+      const loaded = await fetchActiveTasks();
+      setTasks(loaded);
+    }
   };
 
   const handleToggle = async (id: string) => {
@@ -197,7 +212,7 @@ export default function HomeScreen() {
   const handleManualDragEnd = useCallback(async ({ data }: { data: Task[] }) => {
     setManualOrderedActive(data);
     const all = await fetchTasks();
-    const others = all.filter(t => !data.some(d => d.id === t.id));
+    const others = all.filter((t: Task) => !data.some(d => d.id === t.id));
     await updateSortOrder([...data, ...others]);
     loadAll();
   }, []);

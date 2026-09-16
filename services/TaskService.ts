@@ -1,6 +1,6 @@
 import { Task, TaskInput } from '@/Types/Task';
 import { getCurrentUser, onAuthChange } from './auth';
-import { saveUserTask, subscribeUserTasks } from './firestoreTasks';
+import { deleteUserTask, saveUserTask, subscribeUserTasks } from './firestoreTasks';
 import {
   addTask as addLocalTask,
   deleteTask as deleteLocalTask,
@@ -12,8 +12,10 @@ import {
   updateSortOrder as updateLocalSortOrder,
 } from '@/storage/TaskStorage';
 
+export { filterRecurringTasks } from '@/storage/TaskStorage';
+
 // ---------------------------------------------------------------------------
-// Existing fetch / CRUD functions (unchanged semantics)
+// Existing fetch / CRUD functions (mirrored to Firestore when authenticated)
 // ---------------------------------------------------------------------------
 export async function fetchTasks(): Promise<Task[]> {
   return getLocalTasks();
@@ -35,23 +37,57 @@ export async function addTask(input: TaskInput): Promise<Task> {
 }
 
 export async function updateTask(id: string, input: TaskInput): Promise<void> {
-  return editLocalTask(id, input);
+  await editLocalTask(id, input);
+  const user = getCurrentUser();
+  if (user) {
+    const all = await getLocalTasks();
+    const updated = all.find(t => t.id === id);
+    if (updated) {
+      await saveUserTask(user.uid, updated);
+    }
+  }
 }
 
 export async function deleteTask(id: string): Promise<void> {
-  return deleteLocalTask(id);
+  await deleteLocalTask(id);
+  const user = getCurrentUser();
+  if (user) {
+    await deleteUserTask(user.uid, id);
+  }
 }
 
 export async function toggleTask(id: string): Promise<void> {
-  return toggleLocalTask(id);
+  await toggleLocalTask(id);
+  const user = getCurrentUser();
+  if (user) {
+    const all = await getLocalTasks();
+    const updated = all.find(t => t.id === id);
+    if (updated) {
+      await saveUserTask(user.uid, updated);
+    }
+  }
 }
 
 export async function toggleSubtask(taskId: string, subtaskId: string): Promise<void> {
-  return toggleLocalSubtask(taskId, subtaskId);
+  await toggleLocalSubtask(taskId, subtaskId);
+  const user = getCurrentUser();
+  if (user) {
+    const all = await getLocalTasks();
+    const updated = all.find(t => t.id === taskId);
+    if (updated) {
+      await saveUserTask(user.uid, updated);
+    }
+  }
 }
 
 export async function updateSortOrder(tasks: Task[]): Promise<void> {
-  return updateLocalSortOrder(tasks);
+  await updateLocalSortOrder(tasks);
+  const user = getCurrentUser();
+  if (user) {
+    for (const task of tasks) {
+      await saveUserTask(user.uid, task);
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -64,38 +100,93 @@ type Callback = (tasks: Task[]) => void;
 // Firestore listener for the current authenticated UID.
 const callbacks = new Set<Callback>();
 let firestoreUnsub: (() => void) | null = null;
-let currentUid: string | null = null;
+let currentListenerUid: string | null = null;
+let currentAuthUid: string | null = getCurrentUser()?.uid ?? null;
+let isAuthResolved = false;
+let lastKnownTasks: Task[] | null = null;
 
-/** Internal helper: (re)attach the Firestore listener for the given UID */
+/** Internal helper: attach the Firestore listener for the given UID */
 function attachListener(uid: string) {
-  if (firestoreUnsub) return; // already attached for this UID
-  firestoreUnsub = subscribeUserTasks(uid, (tasks) => {
-    // Propagate the snapshot to all registered UI callbacks.
-    callbacks.forEach((cb) => cb(tasks));
-  });
+  if (firestoreUnsub && currentListenerUid === uid) {
+    return; // already attached for this UID
+  }
+  if (firestoreUnsub) {
+    detachListener();
+  }
+
+  currentListenerUid = uid;
+  firestoreUnsub = subscribeUserTasks(
+    uid,
+    (tasks) => {
+      lastKnownTasks = tasks;
+      callbacks.forEach((cb) => {
+        try {
+          cb(tasks);
+        } catch (err) {
+          console.error('Error in TaskService subscriber callback:', err);
+        }
+      });
+    },
+    (error) => {
+      console.error(`Firestore snapshot error for user ${uid}:`, error);
+    }
+  );
 }
 
 /** Internal helper: clean up the existing Firestore listener */
 function detachListener() {
   if (firestoreUnsub) {
-    firestoreUnsub();
+    try {
+      firestoreUnsub();
+    } catch (err) {
+      console.error('Error detaching Firestore listener:', err);
+    }
     firestoreUnsub = null;
   }
+  currentListenerUid = null;
 }
 
-/** React to auth UID changes – ensure the old listener is removed before a new one is created. */
+/** React to auth state changes */
 function handleAuthChange(uid: string | null) {
-  if (uid === currentUid) return; // no change
-  // Clean up previous listener (if any) and reset state.
-  detachListener();
-  currentUid = uid;
-  // If there are active UI subscribers and we now have an authenticated UID, attach.
-  if (uid && callbacks.size > 0) {
-    attachListener(uid);
+  const uidChanged = uid !== currentAuthUid;
+  currentAuthUid = uid;
+  isAuthResolved = true;
+
+  if (uid) {
+    // Authenticated user
+    if (uidChanged || !firestoreUnsub) {
+      if (uidChanged) {
+        detachListener();
+        lastKnownTasks = null;
+      }
+      if (callbacks.size > 0) {
+        attachListener(uid);
+      }
+    }
+  } else {
+    // Guest / logged out
+    detachListener();
+    lastKnownTasks = null;
+    if (callbacks.size > 0) {
+      // Notify existing subscribers with local tasks for guest mode
+      fetchTasks()
+        .then((tasks) => {
+          if (currentAuthUid === null) {
+            callbacks.forEach((cb) => {
+              try {
+                cb(tasks);
+              } catch (err) {
+                console.error('Error in TaskService guest callback:', err);
+              }
+            });
+          }
+        })
+        .catch((err) => console.error('Error fetching local tasks on logout:', err));
+    }
   }
 }
 
-// Register a global auth state observer exactly once.
+// Register global auth state listener exactly once
 onAuthChange((user) => {
   handleAuthChange(user?.uid ?? null);
 });
@@ -103,31 +194,54 @@ onAuthChange((user) => {
 /**
  * Subscribe a UI component to real‑time task updates.
  * Returns an unsubscribe function that removes only the caller's callback.
- * Guest users receive a one‑time snapshot from local storage and never create a Firestore listener.
+ * Guest users receive local tasks and never create a Firestore listener.
  */
 export function subscribeToTasks(cb: Callback): () => void {
   callbacks.add(cb);
 
-  // Guest mode – no UID, just load the current local tasks once.
-  if (!currentUid) {
-    // Load from local storage (AsyncStorage) to give an initial view.
-    fetchTasks().then(cb);
-    return () => {
-      callbacks.delete(cb);
-    };
+  if (!isAuthResolved) {
+    // Auth state is initially unresolved (Firebase session restoring).
+    // If currentAuthUid is already known, attach listener immediately.
+    if (currentAuthUid) {
+      if (!firestoreUnsub) {
+        attachListener(currentAuthUid);
+      } else if (lastKnownTasks) {
+        cb(lastKnownTasks);
+      }
+    } else {
+      // Provide initial local tasks to avoid an empty flash while auth resolves
+      fetchTasks()
+        .then((tasks) => {
+          if (!firestoreUnsub && callbacks.has(cb) && currentAuthUid === null) {
+            cb(tasks);
+          }
+        })
+        .catch(() => {});
+    }
+  } else if (currentAuthUid) {
+    // Auth is resolved and user is authenticated
+    if (!firestoreUnsub) {
+      attachListener(currentAuthUid);
+    } else if (lastKnownTasks) {
+      cb(lastKnownTasks);
+    }
+  } else {
+    // Auth is resolved and user is definitely Guest. Zero Firestore listeners.
+    fetchTasks()
+      .then((tasks) => {
+        if (callbacks.has(cb) && currentAuthUid === null) {
+          cb(tasks);
+        }
+      })
+      .catch(() => {});
   }
 
-  // Authenticated – ensure the Firestore listener is attached.
-  if (!firestoreUnsub) {
-    attachListener(currentUid!);
-  }
-
-  // Return a cleanup function for this subscriber.
   return () => {
     callbacks.delete(cb);
-    // If this was the last subscriber, detach the Firestore listener.
+    // If this was the last subscriber, detach the Firestore listener
     if (callbacks.size === 0) {
       detachListener();
+      lastKnownTasks = null;
     }
   };
 }

@@ -1,6 +1,7 @@
 import {
   collection,
   CollectionReference,
+  deleteDoc,
   doc,
   DocumentReference,
   getDocs,
@@ -63,6 +64,11 @@ export async function saveUserTask(uid: string, task: Task): Promise<void> {
   await setDoc(taskRef, toFirestoreTask(task));
 }
 
+export async function deleteUserTask(uid: string, taskId: string): Promise<void> {
+  const taskRef = getUserTaskDocRef(uid, taskId);
+  await deleteDoc(taskRef);
+}
+
 export async function fetchUserTasks(uid: string): Promise<Task[]> {
   const tasksSnapshot = await getDocs(getUserTasksCollectionRef(uid));
   return tasksSnapshot.docs
@@ -77,13 +83,29 @@ export async function fetchUserTasks(uid: string): Promise<Task[]> {
 export function subscribeUserTasks(
   uid: string,
   onChange: (tasks: Task[]) => void,
+  onError?: (error: Error) => void,
 ): () => void {
-  const unsub = onSnapshot(getUserTasksCollectionRef(uid), (snapshot) => {
-    const tasks = snapshot.docs
-      .map((doc) => fromFirestoreTask(doc.data(), doc.id))
-      .sort((a, b) => a.sortOrder - b.sortOrder);
-    onChange(tasks);
-  });
+  const unsub = onSnapshot(
+    getUserTasksCollectionRef(uid),
+    (snapshot) => {
+      try {
+        const tasks = snapshot.docs
+          .map((doc) => fromFirestoreTask(doc.data(), doc.id))
+          .sort((a, b) => a.sortOrder - b.sortOrder);
+        onChange(tasks);
+      } catch (err) {
+        console.error('Error deserializing Firestore tasks in snapshot listener:', err);
+        if (onError && err instanceof Error) {
+          onError(err);
+        }
+      }
+    },
+    (error) => {
+      console.error('Firestore snapshot listener error:', error);
+      if (onError) {
+        onError(error);
+      }
+    }
+  );
   return unsub;
 }
-

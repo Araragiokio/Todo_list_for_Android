@@ -132,34 +132,37 @@ export const updateSortOrder = async (tasks: Task[]): Promise<void> => {
 
 // ─── Recurring Tasks ──────────────────────────────────────
 
+export const filterRecurringTasks = (tasks: Task[]): Task[] => {
+  const today = new Date();
+  const dayName = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+  const dayOfMonth = today.getDate();
+
+  return tasks.filter(task => {
+    // Non-recurring tasks always show
+    if (!task.recurring) return true;
+
+    // Recurring — only show if today matches the rule
+    if (task.recurring === 'daily') return true;
+    if (task.recurring === 'weekly') {
+      return task.recurringDay?.toLowerCase() === dayName;
+    }
+    if (task.recurring === 'monthly') {
+      return task.recurringDay === dayOfMonth.toString();
+    }
+    if (task.recurring === 'yearly') {
+      const due = task.dueDate ? new Date(task.dueDate) : null;
+      if (!due) return false;
+      return due.getDate() === today.getDate() &&
+             due.getMonth() === today.getMonth();
+    }
+    return false;
+  });
+};
+
 export const getActiveTasks = async (): Promise<Task[]> => {
   try {
     const tasks = await getTasks();
-    const today = new Date();
-    const todayStr = today.toDateString();
-    const dayName = today.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
-    const dayOfMonth = today.getDate();
-
-    return tasks.filter(task => {
-      // Non-recurring tasks always show
-      if (!task.recurring) return true;
-
-      // Recurring — only show if today matches the rule
-      if (task.recurring === 'daily') return true;
-      if (task.recurring === 'weekly') {
-        return task.recurringDay?.toLowerCase() === dayName;
-      }
-      if (task.recurring === 'monthly') {
-        return task.recurringDay === dayOfMonth.toString();
-      }
-      if (task.recurring === 'yearly') {
-        const due = task.dueDate ? new Date(task.dueDate) : null;
-        if (!due) return false;
-        return due.getDate() === today.getDate() &&
-               due.getMonth() === today.getMonth();
-      }
-      return false;
-    });
+    return filterRecurringTasks(tasks);
   } catch {
     return [];
   }
